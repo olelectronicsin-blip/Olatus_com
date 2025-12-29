@@ -1,0 +1,79 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply scroll-smooth;
+  }
+
+  body {
+    @apply bg-[#002E3C] text-white antialiased;
+  }
+}
+
+@layer utilities {
+  .text-gradient {
+    @apply bg-gradient-to-r from-cyan-400 via-purple-500 to-pink-500 text-transparent bg-clip-text;
+  }
+
+  /* Hero animation helpers */
+  @keyframes fade-up {
+    0% { opacity: 0; transform: translateY(16px) scale(.98); filter: blur(4px); }
+    60% { opacity: 1; filter: blur(0); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .animate-fade-up { animation: fade-up .8s ease-out both; }
+
+  @keyframes float-y {
+    0% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+    100% { transform: translateY(0); }
+  }
+  .animate-float { animation: float-y 4.5s ease-in-out infinite; }
+
+  @keyframes rotate-slow {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  .animate-rotate-slow { animation: rotate-slow 24s linear infinite; }
+
+  @keyframes glow-pulse {
+    0%,100% { box-shadow: 0 0 0 0 rgba(34,211,238,.25), 0 0 40px 0 rgba(168,85,247,.15); }
+    50% { box-shadow: 0 0 0 12px rgba(34,211,238,.05), 0 0 80px 0 rgba(168,85,247,.2); }
+  }
+  .animate-glow { animation: glow-pulse 3.2s ease-in-out infinite; }
+
+  @keyframes pan-grid {
+    0% { background-position: 0 0, 0 0; }
+    100% { background-position: 40px 0, 0 40px; }
+  }
+  .grid-overlay {
+    background-image:
+      linear-gradient(to right, rgba(34,211,238,.12) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(34,211,238,.12) 1px, transparent 1px);
+    background-size: 40px 40px;
+    animation: pan-grid 20s linear infinite;
+    mask-image: radial-gradient(ellipse at center, black 40%, transparent 80%);
+  }
+
+  /* Coming Soon animations */
+  @keyframes gradient-shift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+  .animate-gradient {
+    background-size: 200% auto;
+    animation: gradient-shift 3s ease infinite;
+  }
+
+  .animation-delay-1000 {
+    animation-delay: 1s;
+  }
+
+  .animation-delay-2000 {
+    animation-delay: 2s;
+  }
+}

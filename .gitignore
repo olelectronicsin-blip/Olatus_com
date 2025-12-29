@@ -1,0 +1,25 @@
+# Root gitignore for monorepo
+# Node
+node_modules/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+logs/
+
+# Env files (never commit secrets)
+.env
+.env.*
+Client/.env
+Client/.env.*
+Server/.env
+Server/.env.*
+
+# Build outputs
+Client/dist/
+Admin/dist/
+Server/dist/
+
+# Vite local cache
+*.local
