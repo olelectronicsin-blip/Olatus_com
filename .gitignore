@@ -1,25 +1,48 @@
-# Root gitignore for monorepo
-# Node
+# Root .gitignore for monorepo
+
+# Node modules
 node_modules/
 
 # Logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
 logs/
+*.log
+*.log.*
 
-# Env files (never commit secrets)
+# Env files (do not commit secrets)
 .env
 .env.*
 Client/.env
 Client/.env.*
 Server/.env
 Server/.env.*
+# Allow example env files
+!.env.example
+!Client/.env.example
+!Server/.env.example
 
 # Build outputs
+dist/
+build/
 Client/dist/
 Admin/dist/
 Server/dist/
 
-# Vite local cache
+# Caches and metadata
+.cache/
+.eslintcache
+*.tsbuildinfo
+
+# Editor/IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Misc
 *.local
