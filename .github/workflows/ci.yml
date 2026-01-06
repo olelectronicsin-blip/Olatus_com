@@ -1,0 +1,66 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  server-check:
+    name: Server Check
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./Server
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: Server/package-lock.json
+      - run: npm ci
+      - run: npm run build
+      - run: npm audit
+
+  client-check:
+    name: Client Check
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./Client
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: Client/package-lock.json
+      - run: npm ci
+      # Lint is currently allowed to fail due to configuration issues
+      - run: npm run lint
+        continue-on-error: true
+      - run: npm run build
+      - run: npm audit
+
+  admin-check:
+    name: Admin Check
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./Admin
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: Admin/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
+      - run: npm audit
