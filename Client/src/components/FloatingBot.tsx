@@ -86,8 +86,8 @@ const FloatingBot = () => {
         setStep(Step.GetName);
       }, 800);
     }
-  // Intentionally not depending on messages state changes to avoid reseeding; check length in body instead.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // Intentionally not depending on messages state changes to avoid reseeding; check length in body instead.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   useEffect(() => {
@@ -134,14 +134,14 @@ const FloatingBot = () => {
 
     // Check if user is asking a question about services
     const lower = text.toLowerCase();
-    const isAboutServices = lower.includes('what') || lower.includes('service') || lower.includes('do you') || 
-                           lower.includes('can you') || lower.includes('help') || lower.includes('offer') ||
-                           lower.includes('provide') || lower.includes('about') || lower.includes('olatus');
+    const isAboutServices = lower.includes('what') || lower.includes('service') || lower.includes('do you') ||
+      lower.includes('can you') || lower.includes('help') || lower.includes('offer') ||
+      lower.includes('provide') || lower.includes('about') || lower.includes('olatus');
 
     if (isAboutServices && step !== Step.Confirm && step !== Step.Done) {
       // Smart response about Olatus services
       let response = '';
-      
+
       if (lower.includes('ai') || lower.includes('ml') || lower.includes('machine learning')) {
         response = "Awesome! We specialize in AI/ML solutions - from custom models to intelligent automation. We build smart systems that learn and adapt to your business needs.";
       } else if (lower.includes('web') || lower.includes('app') || lower.includes('mobile')) {
@@ -153,10 +153,10 @@ const FloatingBot = () => {
       } else {
         response = "Great question! 🚀 Olatus provides:\n\n✨ AI/ML Development\n💻 Custom Software Solutions\n📱 Web & Mobile Apps\n☁️ Cloud Services & DevOps\n📊 Data Analytics\n🔧 IT Consulting\n\nWe turn your ideas into innovative tech solutions!";
       }
-      
+
       enqueueBot(response);
       await new Promise((r) => setTimeout(r, 600));
-      
+
       // Continue with the flow based on current step
       if (step === Step.GetName) {
         enqueueBot("I'd love to help you more! Can I get your name first?");
@@ -202,7 +202,7 @@ const FloatingBot = () => {
         }
         const nextLead = { ...leadDraft, name: text };
         setLeadDraft(nextLead);
-        
+
         // Friendly greeting variations
         const greetings = [
           `Nice to meet you, ${text}! 😊 How would you like us to reach you—email or phone?`,
@@ -210,7 +210,7 @@ const FloatingBot = () => {
           `Thanks ${text}! So our team can follow up, would you prefer email or phone?`,
           `Pleasure meeting you, ${text}! Should we reach you via email or phone?`
         ];
-        
+
         const randomGreeting = greetings[Math.floor(Math.random() * greetings.length)];
         enqueueBot(randomGreeting);
         setStep(Step.GetContactChoice);
@@ -220,11 +220,11 @@ const FloatingBot = () => {
         const looksEmail = validateEmail(text);
         const digits = text.replace(/\D/g, '');
         const looksPhone = digits.length >= 7;
-        
+
         // Check if switching from phone to email
         const wantsEmail = lower.includes('email') || lower.includes('mail') || looksEmail;
         const wantsPhone = lower.includes('phone') || lower.includes('call') || lower.includes('number') || looksPhone;
-        
+
         if (wantsEmail) {
           enqueueBot("Perfect! What's your email address?");
           setStep(Step.GetEmail);
@@ -258,7 +258,7 @@ const FloatingBot = () => {
           setStep(Step.GetPhone);
           return;
         }
-        
+
         if (!validateEmail(text)) {
           enqueueBot("Hmm, that email doesn't look quite right. Could you double-check it? 😊");
           return;
@@ -283,7 +283,7 @@ const FloatingBot = () => {
           setStep(Step.GetEmail);
           return;
         }
-        
+
         const digits = text.replace(/\D/g, '');
         if (!validatePhone(digits)) {
           enqueueBot('That number seems incomplete. Please share at least 7 digits with your country code. 😊');
@@ -301,7 +301,7 @@ const FloatingBot = () => {
         }
         const nextLead = { ...leadDraft, message: (lower === 'skip' || lower === 'no') ? undefined : text };
         setLeadDraft(nextLead);
-        
+
         const summary = `
 📝 Your Details:
 ━━━━━━━━━━━━━━
@@ -310,7 +310,7 @@ ${nextLead.email ? '📧 Email: ' + nextLead.email : ''}
 ${nextLead.phone ? '📱 Phone: ' + nextLead.phone : ''}
 ${nextLead.message ? '💬 Message: ' + nextLead.message : ''}
 ━━━━━━━━━━━━━━`;
-        
+
         enqueueBot(summary);
         await new Promise((r) => setTimeout(r, 400));
         enqueueBot('Looks good? Should I send this to our team? (yes/no)');
@@ -360,7 +360,7 @@ ${nextLead.message ? '💬 Message: ' + nextLead.message : ''}
 
       {/* Panel */}
       {open && (
-  <div className="fixed bottom-6 right-6 z-50 w-[360px] max-w-[92vw] bg-[#001a24]/80 backdrop-blur-sm border border-cyan-500/30 rounded-2xl shadow-2xl overflow-hidden">
+        <div className="fixed bottom-6 right-6 z-50 w-[360px] max-w-[92vw] bg-[#001a24]/80 backdrop-blur-sm border border-cyan-500/30 rounded-2xl shadow-2xl overflow-hidden">
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-cyan-600/30 to-purple-600/30 border-b border-cyan-500/20">
             <div className="flex items-center gap-3">
@@ -381,17 +381,12 @@ ${nextLead.message ? '💬 Message: ' + nextLead.message : ''}
           <div className="p-4 flex flex-col gap-3 max-h-[60vh] overflow-y-auto">
             {messages.map((m) => (
               <div key={m.id} className={`flex ${m.role === 'bot' ? 'justify-start' : 'justify-end'}`}>
-                <div className={`${m.role === 'bot' ? 'bg-[#002E3C]/60 backdrop-blur-sm border-cyan-500/20' : 'bg-gradient-to-br from-cyan-500 to-purple-600'} text-white border px-3 py-2 rounded-lg max-w-[85%] whitespace-pre-line`}> 
+                <div className={`${m.role === 'bot' ? 'bg-[#002E3C]/60 backdrop-blur-sm border-cyan-500/20' : 'bg-gradient-to-br from-cyan-500 to-purple-600'} text-white border px-3 py-2 rounded-lg max-w-[85%] whitespace-pre-line`}>
                   {m.text}
                 </div>
               </div>
             ))}
             <div ref={chatEndRef} />
-            {!supabase && (
-              <div className="text-[10px] text-gray-500 text-center">
-                Tip: Configure Supabase (VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY) to store leads in the cloud. Currently saving locally.
-              </div>
-            )}
           </div>
 
           {/* Composer */}

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { ArrowRight, Cpu } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import { useContactModal } from '../contexts/ContactModalContext';
 
 const Hero = () => {
@@ -8,18 +9,18 @@ const Hero = () => {
   const { openContactModal } = useContactModal();
 
   useEffect(() => {
-  const canvas = canvasRef.current;
+    const canvas = canvasRef.current;
     if (!canvas) return;
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
 
-  const nodes: Array<{ x: number; y: number; vx: number; vy: number }> = [];
-  // Reduced node count for better performance
-  const nodeCount = window.innerWidth < 768 ? 20 : 40;
+    const nodes: Array<{ x: number; y: number; vx: number; vy: number }> = [];
+    // Reduced node count for better performance
+    const nodeCount = window.innerWidth < 768 ? 20 : 40;
 
     for (let i = 0; i < nodeCount; i++) {
       nodes.push({
@@ -63,7 +64,7 @@ const Hero = () => {
       // Cursor spotlight gradient (only on desktop)
       if (window.innerWidth >= 768) {
         const grad = ctx.createRadialGradient(mx, my, 0, mx, my, 220);
-        grad.addColorStop(0, 'rgba(14,165,233,0.14)');
+        grad.addColorStop(0, 'rgba(14,165,233,0.08)');
         grad.addColorStop(1, 'rgba(14,165,233,0)');
         ctx.fillStyle = grad;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -93,7 +94,7 @@ const Hero = () => {
             ctx.beginPath();
             ctx.moveTo(node.x, node.y);
             ctx.lineTo(otherNode.x, otherNode.y);
-            ctx.strokeStyle = `rgba(34, 211, 238, ${0.18 * (1 - distance / connectionDistance)})`;
+            ctx.strokeStyle = `rgba(34, 211, 238, ${0.1 * (1 - distance / connectionDistance)})`;
             ctx.lineWidth = 0.6;
             ctx.stroke();
           }
@@ -104,7 +105,7 @@ const Hero = () => {
       nodes.forEach((node) => {
         ctx.beginPath();
         ctx.arc(node.x, node.y, 1.8, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(34,211,238,.9)';
+        ctx.fillStyle = 'rgba(34,211,238,0.4)';
         ctx.fill();
       });
 
@@ -126,149 +127,227 @@ const Hero = () => {
     };
   }, []);
 
-  // Simple network visualization component (no WebGL required)
-  const NetworkVisualization = () => {
-    const containerRef = useRef<HTMLDivElement>(null);
-    const [dimensions, setDimensions] = useState({ width: 520, height: 520 });
+  // Service Image Slider Component - Ultra-Polished Premium Design with 3D Transitions
+  const ServiceImageSlider = () => {
+    const [currentIndex, setCurrentIndex] = useState(0);
+    const [direction, setDirection] = useState(0);
+    const [isHovered, setIsHovered] = useState(false);
 
-    useEffect(() => {
-      const handleResize = () => {
-        const isMobile = window.innerWidth < 768;
-        setDimensions({ width: isMobile ? 320 : 520, height: isMobile ? 320 : 520 });
-      };
-      handleResize();
-      window.addEventListener('resize', handleResize);
-      return () => window.removeEventListener('resize', handleResize);
-    }, []);
-
-    const cities = [
-      'Tokyo', 'San Francisco', 'London', 'Berlin', 'Bangalore', 'Sydney',
-      'Singapore', 'Dubai', 'New York', 'Toronto', 'Seoul', 'Paris', 'India'
+    const serviceImages = [
+      {
+        src: '/assets/services/pcb-manufacturing.png',
+        alt: 'PCB Manufacturing',
+        title: 'PCB Manufacturing',
+        subtitle: '24-Hour Prototyping',
+        description: 'Industry-leading fast turnaround with precision quality.',
+        gradient: 'from-cyan-600/80 via-blue-600/60 to-purple-600/40',
+        accentColor: 'cyan',
+        link: '/pcb-manufacturing'
+      },
+      {
+        src: '/assets/services/3d-printing.png',
+        alt: '3D Printing Services',
+        title: '3D Printing',
+        subtitle: 'Same-Day Delivery',
+        description: 'Rapid prototyping excellence with industrial materials.',
+        gradient: 'from-emerald-600/80 via-teal-600/60 to-cyan-600/40',
+        accentColor: 'emerald',
+        link: '/online-3d-printing'
+      },
+      {
+        src: '/assets/services/product-development.png',
+        alt: 'Product Development',
+        title: 'Product Development',
+        subtitle: 'Concept to Market',
+        description: 'Full-cycle innovation support from sketch to shelf.',
+        gradient: 'from-orange-600/80 via-red-600/60 to-pink-600/40',
+        accentColor: 'orange',
+        link: '/product-development'
+      },
+      {
+        src: '/assets/services/robotics-lab.png',
+        alt: 'Technology Lab Setup',
+        title: 'Tech Lab Setup',
+        subtitle: '5000+ Students Trained',
+        description: 'Empowering future innovators with state-of-the-art labs.',
+        gradient: 'from-violet-600/80 via-purple-600/60 to-fuchsia-600/40',
+        accentColor: 'violet',
+        link: '/technology-lab'
+      },
+      {
+        src: '/assets/services/web-development.png',
+        alt: 'IT Services & Development',
+        title: 'IT Services',
+        subtitle: '100% Client Satisfaction',
+        description: 'End-to-end digital transformation and software solutions.',
+        gradient: 'from-blue-600/80 via-indigo-600/60 to-violet-600/40',
+        accentColor: 'blue',
+        link: '/web-development'
+      },
+      {
+        src: '/assets/services/embedded-systems.png',
+        alt: 'Embedded Systems',
+        title: 'Embedded Systems',
+        subtitle: '10,000+ Devices Powered',
+        description: 'Advanced IoT solutions and hardware engineering expertise.',
+        gradient: 'from-pink-600/80 via-fuchsia-600/60 to-purple-600/40',
+        accentColor: 'pink',
+        link: '/embedded-software'
+      }
     ];
 
-    // Reduce connections on mobile for better performance
-    const connectionCount = window.innerWidth < 768 ? 10 : 15;
-    const connections = Array.from({ length: connectionCount }, (_, i) => {
-      const startCity = cities[Math.floor(Math.random() * cities.length)];
-      const endCity = cities[Math.floor(Math.random() * cities.length)];
-      const startX = Math.random() * dimensions.width;
-      const startY = Math.random() * dimensions.height;
-      const endX = startX + (Math.random() - 0.5) * 200;
-      const endY = startY + (Math.random() - 0.5) * 200;
-      const color = ['#00ffff', '#33ccff', '#0099ff'][Math.floor(Math.random() * 3)];
-      
-      return {
-        startX,
-        startY,
-        endX,
-        endY,
-        color,
-        label: `${startCity} → ${endCity}`,
-        delay: i * 0.1,
-        duration: 3 + Math.random() * 2,
-      };
-    });
+    // Auto-advance
+    useEffect(() => {
+      if (isHovered) return;
+      const timer = setInterval(() => {
+        setDirection(1);
+        setCurrentIndex((prev) => (prev + 1) % serviceImages.length);
+      }, 5000);
+      return () => clearInterval(timer);
+    }, [isHovered, serviceImages.length]);
 
-    const points = connections.flatMap(conn => [
-      { x: conn.startX, y: conn.startY, color: '#00eaff', label: conn.label.split(' → ')[0] },
-      { x: conn.endX, y: conn.endY, color: '#00c0ff', label: conn.label.split(' → ')[1] }
-    ]).slice(0, window.innerWidth < 768 ? 8 : 12);
+    const goToSlide = (index: number) => {
+      setDirection(index > currentIndex ? 1 : -1);
+      setCurrentIndex(index);
+    };
+
+    const goToPrevious = () => {
+      setDirection(-1);
+      setCurrentIndex((prev) => (prev - 1 + serviceImages.length) % serviceImages.length);
+    };
+
+    const goToNext = () => {
+      setDirection(1);
+      setCurrentIndex((prev) => (prev + 1) % serviceImages.length);
+    };
+
+    const variants = {
+      enter: (direction: number) => ({
+        x: direction > 0 ? 1000 : -1000,
+        opacity: 0,
+        scale: 0.8,
+        rotateY: direction > 0 ? 45 : -45,
+      }),
+      center: {
+        zIndex: 1,
+        x: 0,
+        opacity: 1,
+        scale: 1,
+        rotateY: 0,
+      },
+      exit: (direction: number) => ({
+        zIndex: 0,
+        x: direction < 0 ? 1000 : -1000,
+        opacity: 0,
+        scale: 0.8,
+        rotateY: direction < 0 ? 45 : -45,
+      }),
+    };
 
     return (
-      <motion.div
-        ref={containerRef}
-        initial={{ opacity: 0, scale: 0.96 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 1.2, ease: 'easeOut' }}
-        className="relative w-full h-full"
-        style={{ 
-          width: dimensions.width, 
-          height: dimensions.height,
-          willChange: 'transform, opacity' // GPU acceleration hint
-        }}
+      <div
+        className="relative w-full h-[540px] perspective-2000"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
       >
-        {/* Animated circles */}
-        {[...Array(3)].map((_, i) => (
-          <motion.div
-            key={`circle-${i}`}
-            className="absolute rounded-full border-2"
-            style={{
-              borderColor: `rgba(${100 + i * 50}, ${200 + i * 30}, 255, ${0.3 - i * 0.1})`,
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              width: `${60 + i * 30}%`,
-              height: `${60 + i * 30}%`,
-            }}
-            animate={{
-              scale: [1, 1.1, 1],
-              opacity: [0.3, 0.5, 0.3],
-            }}
-            transition={{
-              duration: 3 + i,
-              repeat: Infinity,
-              ease: 'easeInOut',
-            }}
-          />
-        ))}
+        {/* Abstract Glow Background */}
+        <div className="absolute inset-0 z-0">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3/4 h-3/4 bg-cyan-500/10 rounded-full blur-[100px] animate-pulse" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2/3 h-2/3 bg-purple-500/10 rounded-full blur-[80px]" style={{ animationDelay: '1s' }} />
+        </div>
 
-        {/* Connection lines */}
-        <svg className="absolute inset-0 w-full h-full" style={{ overflow: 'visible' }}>
-          {connections.map((conn, i) => (
-            <motion.line
-              key={`line-${i}`}
-              x1={conn.startX}
-              y1={conn.startY}
-              x2={conn.endX}
-              y2={conn.endY}
-              stroke={conn.color}
-              strokeWidth="1"
-              strokeDasharray="4 4"
-              opacity={0.4}
-              initial={{ pathLength: 0, opacity: 0 }}
-              animate={{ pathLength: 1, opacity: 0.4 }}
-              transition={{
-                duration: conn.duration,
-                repeat: Infinity,
-                ease: 'linear',
-                delay: conn.delay,
-              }}
-            />
-          ))}
-        </svg>
+        <div className="relative w-full h-full z-10 flex flex-col items-center justify-start pt-8">
+          <AnimatePresence initial={false} custom={direction}>
+            <Link to={serviceImages[currentIndex].link || '#'} className="absolute inset-0 z-10 w-full h-[400px] sm:h-[450px]">
+              <motion.div
+                key={currentIndex}
+                custom={direction}
+                variants={variants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{
+                  x: { type: "spring", stiffness: 300, damping: 30 },
+                  opacity: { duration: 0.2 },
+                  rotateY: { duration: 0.5 },
+                  scale: { duration: 0.5 }
+                }}
+                className="absolute w-full max-w-lg h-[400px] sm:h-[450px] rounded-3xl overflow-hidden shadow-2xl border border-white/10 bg-[#001a24] group cursor-pointer"
+              >
+                {/* Image Layer */}
+                <div className="absolute inset-0 w-full h-full">
+                  <motion.img
+                    src={serviceImages[currentIndex].src}
+                    alt={serviceImages[currentIndex].title}
+                    className="w-full h-full object-cover"
+                    initial={{ scale: 1.1 }}
+                    animate={{ scale: 1 }}
+                    transition={{ duration: 5 }}
+                  />
+                  <div className={`absolute inset-0 bg-gradient-to-tr ${serviceImages[currentIndex].gradient} mix-blend-overlay opacity-60`} />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#00080c] via-transparent to-transparent opacity-90" />
+                </div>
 
-        {/* Animated points */}
-        {points.map((point, i) => (
-          <motion.div
-            key={`point-${i}`}
-            className="absolute rounded-full"
-            style={{
-              left: point.x,
-              top: point.y,
-              width: 8,
-              height: 8,
-              backgroundColor: point.color,
-              boxShadow: `0 0 12px ${point.color}`,
-            }}
-            animate={{
-              scale: [1, 1.5, 1],
-              opacity: [0.6, 1, 0.6],
-            }}
-            transition={{
-              duration: 2 + Math.random(),
-              repeat: Infinity,
-              ease: 'easeInOut',
-              delay: i * 0.1,
-            }}
-          />
-        ))}
-      </motion.div>
+                {/* Content Layer */}
+                <div className="absolute inset-0 flex flex-col justify-end p-8">
+                  <motion.div
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.2, duration: 0.4 }}
+                  >
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 mb-3">
+                      <span className={`w-2 h-2 rounded-full bg-${serviceImages[currentIndex].accentColor}-400 animate-pulse`} />
+                      <span className="text-xs font-semibold tracking-wider text-white uppercase">{serviceImages[currentIndex].subtitle}</span>
+                    </div>
+                    <h3 className="text-3xl font-bold text-white mb-2 leading-tight">{serviceImages[currentIndex].title}</h3>
+                    <p className="text-gray-300 text-sm leading-relaxed max-w-[90%]">{serviceImages[currentIndex].description}</p>
+                  </motion.div>
+                </div>
+              </motion.div>
+            </Link>
+          </AnimatePresence>
+
+          {/* Navigation Controls */}
+          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-6 z-20">
+            <button
+              onClick={goToPrevious}
+              className="p-3 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 hover:scale-110 transition-all duration-300 backdrop-blur-sm group"
+              aria-label="Previous"
+            >
+              <svg className="w-5 h-5 text-gray-400 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+
+            <div className="flex gap-2">
+              {serviceImages.map((_, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => goToSlide(idx)}
+                  className={`h-2 rounded-full transition-all duration-300 ${idx === currentIndex ? 'w-8 bg-cyan-400' : 'w-2 bg-gray-600 hover:bg-gray-500'}`}
+                  aria-label={`Go to slide ${idx + 1}`}
+                />
+              ))}
+            </div>
+
+            <button
+              onClick={goToNext}
+              className="p-3 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 hover:scale-110 transition-all duration-300 backdrop-blur-sm group"
+              aria-label="Next"
+            >
+              <svg className="w-5 h-5 text-gray-400 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
     );
   };
 
   return (
     <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden pb-0 pt-10 sm:pt-0">
-  {/* Background handled by site-wide ScrollArt only */}
+      {/* Background handled by site-wide ScrollArt only */}
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-20">
         <div className="grid lg:grid-cols-2 gap-8 md:gap-12 items-center lg:items-center">
@@ -294,48 +373,46 @@ const Hero = () => {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 animate-fade-up" style={{ animationDelay: '550ms' }}>
-              <button 
+              <button
+                onClick={openContactModal}
+                className="group px-8 py-4 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold rounded-lg hover:shadow-lg hover:shadow-cyan-500/50 transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-2 animate-glow"
+              >
+                Get Free Consultation
+                <ArrowRight className="group-hover:translate-x-1 transition-transform" size={20} />
+              </button>
+              <button
                 onClick={() => {
                   const servicesSection = document.getElementById('services');
                   if (servicesSection) {
                     servicesSection.scrollIntoView({ behavior: 'smooth' });
                   }
                 }}
-                className="group px-8 py-4 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold rounded-lg hover:shadow-lg hover:shadow-cyan-500/50 transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-2 animate-glow"
-              >
-                Explore Our Services
-                <ArrowRight className="group-hover:translate-x-1 transition-transform" size={20} />
-              </button>
-              <button 
-                onClick={openContactModal}
                 className="px-8 py-4 bg-transparent border-2 border-purple-500 text-purple-400 font-semibold rounded-lg hover:bg-purple-500/10 hover:shadow-lg hover:shadow-purple-500/50 transition-all duration-300"
               >
-                Connect With Us
+                View Our Services
               </button>
             </div>
 
             <div className="flex gap-8 pt-8">
               <div className="text-center">
-                <div className="text-4xl font-bold bg-gradient-to-r from-cyan-400 to-purple-500 text-transparent bg-clip-text">7+</div>
+                <div className="text-4xl font-bold bg-gradient-to-r from-cyan-400 to-purple-500 text-transparent bg-clip-text animate-pulse">7+</div>
                 <div className="text-gray-400 text-sm mt-1">Years Experience</div>
               </div>
               <div className="text-center">
-                <div className="text-4xl font-bold bg-gradient-to-r from-cyan-400 to-purple-500 text-transparent bg-clip-text">500+</div>
+                <div className="text-4xl font-bold bg-gradient-to-r from-cyan-400 to-purple-500 text-transparent bg-clip-text animate-pulse">500+</div>
                 <div className="text-gray-400 text-sm mt-1">Projects Completed</div>
               </div>
               <div className="text-center">
-                <div className="text-4xl font-bold bg-gradient-to-r from-cyan-400 to-purple-500 text-transparent bg-clip-text">100+</div>
+                <div className="text-4xl font-bold bg-gradient-to-r from-cyan-400 to-purple-500 text-transparent bg-clip-text animate-pulse">100+</div>
                 <div className="text-gray-400 text-sm mt-1">Happy Clients</div>
               </div>
             </div>
+
           </div>
 
           <div className="relative hidden lg:block">
-            <div className="relative w-full h-[400px] sm:h-[480px] md:h-[520px] flex items-center justify-center">
-              <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-purple-500/20 rounded-3xl blur-3xl" />
-              <div className="relative w-full h-full flex items-center justify-center">
-                <NetworkVisualization />
-              </div>
+            <div className="relative w-full flex items-center justify-end pr-8">
+              <ServiceImageSlider />
             </div>
           </div>
         </div>

@@ -20,7 +20,9 @@ import Careers from './components/Careers';
 import WebDevelopment from './components/WebDevelopment';
 import EmbeddedSoftware from './components/EmbeddedSoftware';
 import Documentation from './components/Documentation';
+import TrainingProgram from './components/TrainingProgram';
 import ContactModal from './components/ContactModal';
+import Testimonials from './components/Testimonials';
 import { ContactModalProvider, useContactModal } from './contexts/ContactModalContext';
 
 function HomePage() {
@@ -30,6 +32,7 @@ function HomePage() {
       <Navbar />
       <Hero />
       <Services />
+      <Testimonials />
       <About />
       <Projects />
       <Contact />
@@ -41,7 +44,7 @@ function HomePage() {
 
 function AppContent() {
   const { isContactModalOpen, closeContactModal } = useContactModal();
-  
+
   return (
     <>
       <div className="min-h-screen relative z-10">
@@ -59,6 +62,7 @@ function AppContent() {
           <Route path="/web-development" element={<WebDevelopment />} />
           <Route path="/embedded-software" element={<EmbeddedSoftware />} />
           <Route path="/documentation" element={<Documentation />} />
+          <Route path="/training/:programId" element={<TrainingProgram />} />
         </Routes>
       </div>
       <ContactModal isOpen={isContactModalOpen} onClose={closeContactModal} />

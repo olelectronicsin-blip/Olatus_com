@@ -49,7 +49,7 @@ export async function chatAI(req: Request, res: Response) {
         return res.status(response.status).json({ error: 'Ollama error', details: text });
       }
 
-      const data = await response.json();
+      const data = (await response.json()) as any;
       const content = data?.message?.content ?? '';
       return res.json({ content });
     }
@@ -84,7 +84,7 @@ export async function chatAI(req: Request, res: Response) {
       return res.status(response.status).json({ error: 'OpenAI error', details: text });
     }
 
-    const data = await response.json();
+    const data = (await response.json()) as any;
     const content: string = data?.choices?.[0]?.message?.content ?? '';
     return res.json({ content });
   } catch (err) {

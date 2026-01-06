@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import api, { API_ORIGIN } from '../lib/api';
-import { Mail, Wrench, GraduationCap, RefreshCw } from 'lucide-react';
+import { Mail, Wrench, GraduationCap, RefreshCw, BookOpen } from 'lucide-react';
 
 type InboxItem = {
   id: string;
-  type: 'contact' | 'service' | 'internship';
+  type: 'contact' | 'service' | 'internship' | 'training';
   name: string;
   email: string;
   subject: string;
@@ -17,7 +17,7 @@ export default function Inbox() {
   const [items, setItems] = useState<InboxItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [type, setType] = useState<'all' | 'contact' | 'service' | 'internship'>('all');
+  const [type, setType] = useState<'all' | 'contact' | 'service' | 'internship' | 'training'>('all');
   const [query, setQuery] = useState('');
   const [selected, setSelected] = useState<InboxItem | null>(null);
   const [detail, setDetail] = useState<any | null>(null);
@@ -27,6 +27,7 @@ export default function Inbox() {
   const iconFor = (t: InboxItem['type']) => {
     if (t === 'contact') return <Mail size={16} className="text-cyan-300" />;
     if (t === 'service') return <Wrench size={16} className="text-purple-300" />;
+    if (t === 'training') return <BookOpen size={16} className="text-pink-300" />;
     return <GraduationCap size={16} className="text-amber-300" />;
   };
 
@@ -36,7 +37,14 @@ export default function Inbox() {
     try {
       const params = new URLSearchParams();
       params.set('limit', '100');
-      if (type !== 'all') params.set('type', type);
+      // For backend compatibility, 'training' requests are fetched with 'internship' type if not separated in backend query param logic yet.
+      // But typically "getInbox" returns everything. We just filter locally or by type param.
+      // If we pass 'training' to backend, backend needs to support it?
+      // Our backend implementation ignores 'type' param for the mixed fetch, or filters specific collections.
+      // Since we modified fetchInternships to return 'training' type, fetching 'all' will work.
+      // If we fetch specific type 'training', we might need to adjust backend OR just leverage client filtering for now if backend doesn't support 'training' type param explicitly.
+      // Let's rely on 'all' fetching 'training' items automatically.
+
       const { data } = await api.get(`/admin/inbox?${params.toString()}`);
       setItems(data.data.items || []);
     } catch (e: any) {
@@ -49,19 +57,25 @@ export default function Inbox() {
   useEffect(() => {
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [type]);
+  }, []); // Reload on mount only, let client filter handle type switching for smoother UX if data is small
 
   const filtered = useMemo(() => {
     const q = query.toLowerCase().trim();
-    if (!q) return items;
-    return items.filter((i) =>
+    let res = items;
+
+    if (type !== 'all') {
+      res = res.filter(i => i.type === type);
+    }
+
+    if (!q) return res;
+    return res.filter((i) =>
       [i.name, i.email, i.subject, i.message, i.status, i.type]
         .filter(Boolean)
-        .join(' ') 
+        .join(' ')
         .toLowerCase()
         .includes(q)
     );
-  }, [items, query]);
+  }, [items, query, type]);
 
   const makeUrl = (url?: string) => {
     if (!url) return '';
@@ -78,7 +92,7 @@ export default function Inbox() {
       let url = '';
       if (item.type === 'contact') url = `/contact/${item.id}`;
       else if (item.type === 'service') url = `/service-requests/${item.id}`;
-      else url = `/internships/applications/${item.id}`;
+      else url = `/internships/applications/${item.id}`; // training & internship both use this
 
       const { data } = await api.get(url);
       setDetail(data.data || data);
@@ -105,19 +119,19 @@ export default function Inbox() {
 
       <div className="flex flex-col md:flex-row gap-3 mb-4">
         <div className="flex gap-2">
-          {(['all','contact','service','internship'] as const).map((t) => (
+          {(['all', 'contact', 'service', 'internship'] as const).map((t) => (
             <button
               key={t}
               onClick={() => setType(t)}
-              className={`px-3 py-1.5 rounded-full text-sm border ${type===t? 'bg-gradient-to-r from-cyan-500/20 to-purple-500/20 text-white border-cyan-500/30':'bg-white/5 text-gray-300 border-white/10 hover:bg-white/10'}`}
+              className={`px-3 py-1.5 rounded-full text-sm border ${type === t ? 'bg-gradient-to-r from-cyan-500/20 to-purple-500/20 text-white border-cyan-500/30' : 'bg-white/5 text-gray-300 border-white/10 hover:bg-white/10'}`}
             >
-              {t[0].toUpperCase()+t.slice(1)}
+              {t[0].toUpperCase() + t.slice(1)}
             </button>
           ))}
         </div>
         <input
           value={query}
-          onChange={(e)=>setQuery(e.target.value)}
+          onChange={(e) => setQuery(e.target.value)}
           placeholder="Search name, email, subject, message..."
           className="flex-1 px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-400"
         />
@@ -145,8 +159,8 @@ export default function Inbox() {
             ) : filtered.length === 0 ? (
               <tr><td colSpan={6} className="p-6 text-center text-gray-400">No items found</td></tr>
             ) : (
-              filtered.map((i)=> (
-                <tr key={`${i.type}-${i.id}`} className="border-t border-white/10 hover:bg-white/5 cursor-pointer" onClick={()=>openDetail(i)}>
+              filtered.map((i) => (
+                <tr key={`${i.type}-${i.id}`} className="border-t border-white/10 hover:bg-white/5 cursor-pointer" onClick={() => openDetail(i)}>
                   <td className="p-3">
                     <div className="flex items-center gap-2">
                       {iconFor(i.type)}
@@ -175,11 +189,11 @@ export default function Inbox() {
       {selected && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
           <div className="relative bg-[#001a24] rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto border border-cyan-500/30">
-            <button onClick={()=>{ setSelected(null); setDetail(null); setDetailError(null); }} className="absolute top-4 right-4 text-gray-400 hover:text-white">
+            <button onClick={() => { setSelected(null); setDetail(null); setDetailError(null); }} className="absolute top-4 right-4 text-gray-400 hover:text-white">
               ✕
             </button>
             <div className="p-6">
-              <h3 className="text-xl font-semibold text-white mb-4">{selected.type[0].toUpperCase()+selected.type.slice(1)} Details</h3>
+              <h3 className="text-xl font-semibold text-white mb-4">{selected.type[0].toUpperCase() + selected.type.slice(1)} Details</h3>
               {detailLoading && <div className="text-gray-300">Loading details...</div>}
               {detailError && <div className="text-red-300 bg-red-900/20 border border-red-500/30 rounded p-2">{detailError}</div>}
               {!detailLoading && !detailError && detail && (
@@ -215,7 +229,7 @@ export default function Inbox() {
                       {Array.isArray(detail.files) && detail.files.length > 0 && (
                         <div className="col-span-2"><span className="text-gray-400">Files:</span>
                           <ul className="mt-1 space-y-1">
-                            {detail.files.map((f: any, idx: number)=> (
+                            {detail.files.map((f: any, idx: number) => (
                               <li key={idx} className="text-cyan-300"><a href={makeUrl(f.fileUrl || f.url)} target="_blank" rel="noreferrer">{f.fileName || f.name}</a></li>
                             ))}
                           </ul>
@@ -253,6 +267,17 @@ export default function Inbox() {
                       {detail.githubUrl && (<div><span className="text-gray-400">GitHub:</span> <a className="text-cyan-300" href={detail.githubUrl} target="_blank" rel="noreferrer">{detail.githubUrl}</a></div>)}
                       <div><span className="text-gray-400">Status:</span> {detail.status}</div>
                       <div><span className="text-gray-400">Applied:</span> {new Date(detail.appliedAt || detail.createdAt).toLocaleString()}</div>
+                    </div>
+                  )}
+
+                  {selected.type === 'training' && (
+                    <div className="grid grid-cols-2 gap-3 text-gray-200">
+                      <div><span className="text-gray-400">Name:</span> {detail.firstName} {detail.lastName}</div>
+                      <div><span className="text-gray-400">Email:</span> {detail.email}</div>
+                      <div><span className="text-gray-400">Phone:</span> {detail.phone}</div>
+                      <div className="col-span-2"><span className="text-gray-400">Program:</span> {detail.degree}</div>
+                      <div className="col-span-2"><span className="text-gray-400">Status:</span> {detail.status}</div>
+                      <div className="col-span-2"><span className="text-gray-400">Registered:</span> {new Date(detail.appliedAt || detail.createdAt).toLocaleString()}</div>
                     </div>
                   )}
                 </div>

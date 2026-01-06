@@ -22,6 +22,8 @@ const services = [
     ],
     gradient: 'from-cyan-500 to-blue-500',
     link: '/pcb-manufacturing',
+    badge: 'Popular',
+    valueProposition: '24-Hour Prototyping • 99.8% Quality Rate',
   },
   {
     icon: Box,
@@ -35,6 +37,7 @@ const services = [
     ],
     gradient: 'from-green-500 to-emerald-500',
     link: '/online-3d-printing',
+    valueProposition: 'Same-Day Delivery Available',
   },
   {
     icon: Package,
@@ -48,6 +51,8 @@ const services = [
     ],
     gradient: 'from-orange-500 to-red-500',
     link: '/product-development',
+    badge: 'Trending',
+    valueProposition: 'From Concept to Market in 90 Days',
   },
   {
     icon: FlaskConical,
@@ -61,6 +66,7 @@ const services = [
     ],
     gradient: 'from-purple-500 to-pink-500',
     link: '/technology-lab',
+    valueProposition: '5000+ Students Trained',
   },
   {
     icon: Globe,
@@ -74,6 +80,8 @@ const services = [
     ],
     gradient: 'from-blue-500 to-cyan-500',
     link: '/web-development',
+    badge: 'New',
+    valueProposition: '100% Client Satisfaction',
   },
   {
     icon: Cpu,
@@ -87,6 +95,7 @@ const services = [
     ],
     gradient: 'from-pink-500 to-purple-600',
     link: '/embedded-software',
+    valueProposition: '10,000+ Devices Powered',
   },
 ];
 
@@ -137,6 +146,15 @@ const Services = () => {
                     ${hoveredIndex === index ? 'opacity-10' : 'opacity-0'}
                   `}></div>
 
+                  {/* Badge */}
+                  {service.badge && (
+                    <div className="absolute top-4 right-4">
+                      <span className={`px-3 py-1 rounded-full text-xs font-semibold bg-gradient-to-r ${service.gradient} text-white shadow-lg`}>
+                        {service.badge}
+                      </span>
+                    </div>
+                  )}
+
                   <div className="relative z-10">
                     <div className={`
                       w-16 h-16 rounded-lg bg-gradient-to-br ${service.gradient}
@@ -154,6 +172,15 @@ const Services = () => {
                     <p className="text-gray-400 text-sm mb-4">
                       {service.description}
                     </p>
+
+                    {/* Value Proposition */}
+                    {service.valueProposition && (
+                      <div className="mb-4 pb-4 border-b border-cyan-500/20">
+                        <p className="text-cyan-300 text-xs font-semibold">
+                          ✨ {service.valueProposition}
+                        </p>
+                      </div>
+                    )}
 
                     <ul className="space-y-2">
                       {service.details.map((detail, i) => (

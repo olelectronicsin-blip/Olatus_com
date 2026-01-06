@@ -17,7 +17,7 @@ const ScrollArt: React.FC = () => {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-  let rafId = 0;
+    let rafId = 0;
     const DPR = Math.min(window.devicePixelRatio || 1, 2);
     let lastFrameTime = 0;
     const targetFPS = 30; // Limit to 30 FPS for better performance
@@ -91,31 +91,31 @@ const ScrollArt: React.FC = () => {
         return;
       }
       lastFrameTime = currentTime;
-      
+
       const w = canvas.width;
       const h = canvas.height;
       const now = performance.now();
       const t = now / 1000;
-  const target = getProgress();
+      const target = getProgress();
 
       // time-based smoothing for scroll progress (dt-aware lerp)
-    const dt = Math.max(0.001, (now - lastTimeRef.current) / 1000);
+      const dt = Math.max(0.001, (now - lastTimeRef.current) / 1000);
       lastTimeRef.current = now;
-    const smooth = smoothProgressRef.current + (target - smoothProgressRef.current) * Math.min(1, dt * 4); // ~250ms to settle
+      const smooth = smoothProgressRef.current + (target - smoothProgressRef.current) * Math.min(1, dt * 4); // ~250ms to settle
       smoothProgressRef.current = smooth;
-    // Derive velocity from smoothed progress (avoids spikes) and clamp it
-    const velocityRaw = (smooth - lastSmoothRef.current) / dt; // progress units per second
-    lastSmoothRef.current = smooth;
-    const velocity = Math.max(-1.5, Math.min(1.5, velocityRaw));
+      // Derive velocity from smoothed progress (avoids spikes) and clamp it
+      const velocityRaw = (smooth - lastSmoothRef.current) / dt; // progress units per second
+      lastSmoothRef.current = smooth;
+      const velocity = Math.max(-1.5, Math.min(1.5, velocityRaw));
       lastProgressRef.current = target;
 
       // clear
       ctx.clearRect(0, 0, w, h);
 
-  // background gradient that shifts with scroll
+      // background gradient that shifts with scroll
       const bg = ctx.createLinearGradient(0, 0, w, h);
-  bg.addColorStop(0, `rgba(13,78,85,${0.35 + 0.2 * Math.sin(smooth * Math.PI)})`);
-      bg.addColorStop(1, `rgba(0,46,60,0.6)`);
+      bg.addColorStop(0, `rgba(8,45,50,${0.15 + 0.1 * Math.sin(smooth * Math.PI)})`);
+      bg.addColorStop(1, `rgba(0,10,20,0.6)`);
       ctx.fillStyle = bg;
       ctx.fillRect(0, 0, w, h);
 
@@ -125,43 +125,20 @@ const ScrollArt: React.FC = () => {
         const a = 0.5 + 0.5 * Math.sin(s.t);
         ctx.beginPath();
         ctx.arc(s.x, s.y, s.r * DPR, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(34,211,238,${0.2 + a * 0.5})`;
+        ctx.fillStyle = `rgba(34,211,238,${0.1 + a * 0.3})`;
         ctx.fill();
       }
 
-  // subtle grid with gentle pan influenced by time + scroll
-  ctx.save();
-      ctx.strokeStyle = 'rgba(34,211,238,0.08)';
+      // subtle grid with gentle pan influenced by time + scroll
+      ctx.save();
+      ctx.strokeStyle = 'rgba(34,211,238,0.03)';
       ctx.lineWidth = 1 * DPR;
-  const step = 40 * DPR;
-  const ox = ((t * 12) + smooth * 120) % step;
-  const oy = ((t * 8) + smooth * 90) % step;
-  for (let x = -ox; x <= w; x += step) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke(); }
-  for (let y = -oy; y <= h; y += step) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
+      const step = 40 * DPR;
+      const ox = ((t * 12) + smooth * 120) % step;
+      const oy = ((t * 8) + smooth * 90) % step;
+      for (let x = -ox; x <= w; x += step) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke(); }
+      for (let y = -oy; y <= h; y += step) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
       ctx.restore();
-
-      // ribbon layers
-      const ribbon = (phase: number, amp: number, thickness: number, hueBase: number, alpha = 0.5) => {
-        ctx.save();
-        ctx.globalCompositeOperation = 'lighter';
-        ctx.beginPath();
-        const steps = 24;
-        for (let i = 0; i <= steps; i++) {
-          const x = (i / steps) * w;
-          const y = h * (0.3 + 0.4 * Math.sin((i / steps) * Math.PI + phase + smooth * 6));
-          const dy = amp * Math.sin((i / steps) * 8 + t * 0.8 + phase + velocity * 0.02);
-          const yy = y + dy * DPR;
-          if (i === 0) ctx.moveTo(x, yy);
-          else ctx.lineTo(x, yy);
-        }
-  ctx.strokeStyle = `hsla(${hueBase + smooth * 100}, 90%, 60%, ${alpha})`;
-        ctx.lineWidth = thickness * DPR;
-        ctx.stroke();
-        ctx.restore();
-      };
-      ribbon(t * 0.6, 14, 2.2, 190, 0.35);
-      ribbon(t * 0.9 + 1.2, 20, 1.4, 260, 0.28);
-      ribbon(t * 0.4 + 2.4, 10, 3.0, 200, 0.22);
 
       // orbiting particles with constant rotation speed; radius follows scroll progress
       const cx = w * (0.2 + 0.6 * smooth);
@@ -186,7 +163,7 @@ const ScrollArt: React.FC = () => {
       // connection network - subtle behind content (optimized nested loop)
       const connectionDist = 140 * DPR;
       const connectionDistSq = connectionDist * connectionDist;
-      
+
       // Update positions first
       for (const n of nodes) {
         n.x += n.vx; n.y += n.vy;
@@ -195,7 +172,7 @@ const ScrollArt: React.FC = () => {
         if (n.x < 0 || n.x > w) n.vx *= -1;
         if (n.y < 0 || n.y > h) n.vy *= -1;
       }
-      
+
       // Draw connections (optimized - only check each pair once)
       for (let i = 0; i < nodes.length; i++) {
         const n = nodes[i];
@@ -204,24 +181,24 @@ const ScrollArt: React.FC = () => {
           const dx = n.x - m.x;
           const dy = n.y - m.y;
           const distSq = dx * dx + dy * dy;
-          
+
           if (distSq < connectionDistSq) {
             const dist = Math.sqrt(distSq);
             ctx.beginPath();
             ctx.moveTo(n.x, n.y);
             ctx.lineTo(m.x, m.y);
-            ctx.strokeStyle = `rgba(34,211,238,${0.14 * (1 - dist / connectionDist)})`;
+            ctx.strokeStyle = `rgba(34,211,238,${0.08 * (1 - dist / connectionDist)})`;
             ctx.lineWidth = 0.6 * DPR;
             ctx.stroke();
           }
         }
       }
-      
+
       // Draw nodes
       for (const n of nodes) {
         ctx.beginPath();
         ctx.arc(n.x, n.y, 1.6 * DPR, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(34,211,238,0.85)';
+        ctx.fillStyle = 'rgba(34,211,238,0.4)';
         ctx.fill();
       }
 
@@ -238,7 +215,7 @@ const ScrollArt: React.FC = () => {
       const sweepY = h * (0.85 - 0.6 * smooth);
       const sweep = ctx.createLinearGradient(0, sweepY - 40 * DPR, 0, sweepY + 40 * DPR);
       sweep.addColorStop(0, 'rgba(34,211,238,0)');
-      sweep.addColorStop(0.5, 'rgba(34,211,238,0.25)');
+      sweep.addColorStop(0.5, 'rgba(34,211,238,0.1)');
       sweep.addColorStop(1, 'rgba(34,211,238,0)');
       ctx.fillStyle = sweep;
       ctx.fillRect(0, sweepY - 60 * DPR, w, 120 * DPR);

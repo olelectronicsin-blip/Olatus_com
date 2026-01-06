@@ -128,16 +128,19 @@ export const getInbox = async (req: Request, res: Response, next: NextFunction) 
 
     const fetchInternships = async () => {
       const docs = await InternshipApplication.find().sort({ createdAt: -1 }).limit(limit);
-      return docs.map((d) => ({
-        id: d._id,
-        type: 'internship' as const,
-        name: `${d.firstName} ${d.lastName}`.trim(),
-        email: d.email,
-        subject: d.position,
-        message: d.coverLetter || '',
-        status: d.status,
-        createdAt: d.createdAt,
-      }));
+      return docs.map((d) => {
+        const isTraining = d.position === 'TRAINING_INQUIRY';
+        return {
+          id: d._id,
+          type: (isTraining ? 'training' : 'internship') as 'internship' | 'training', // Cast to any if needed to avoid TS error in strict setup, but here we just return objects
+          name: `${d.firstName} ${d.lastName}`.trim(),
+          email: d.email,
+          subject: isTraining ? d.degree : d.position, // Use degree (Program Name) for training
+          message: d.coverLetter || '',
+          status: d.status,
+          createdAt: d.createdAt,
+        };
+      });
     };
 
     let items: any[] = [];

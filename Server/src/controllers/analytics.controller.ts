@@ -8,8 +8,8 @@ export const getAnalytics = async (req: Request, res: Response, next: NextFuncti
 
     let query = Analytics.find();
 
-    if (startDate) query = query.where('createdAt').gte(new Date(startDate as string));
-    if (endDate) query = query.where('createdAt').lte(new Date(endDate as string));
+    if (startDate) query = query.where('createdAt').gte(new Date(startDate as string) as any);
+    if (endDate) query = query.where('createdAt').lte(new Date(endDate as string) as any);
 
     const data = await query.sort({ createdAt: -1 });
 
@@ -18,7 +18,7 @@ export const getAnalytics = async (req: Request, res: Response, next: NextFuncti
     const uniqueVisitors = new Set(data.map(d => d.visitorId)).size;
     const topPages = data
       .filter(d => d.eventType === 'pageview')
-      .reduce((acc: any, curr) => {
+      .reduce((acc: any, curr: any) => {
         acc[curr.page!] = (acc[curr.page!] || 0) + 1;
         return acc;
       }, {});

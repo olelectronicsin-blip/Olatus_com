@@ -36,13 +36,13 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
       password: hashedPassword,
       name,
       role: 'user'
-    });
+    } as any);
 
     // Generate token
     const token = jwt.sign(
       { id: user._id, email: user.email, role: user.role },
       process.env.JWT_SECRET!,
-      { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
+      { expiresIn: process.env.JWT_EXPIRES_IN || '7d' } as any
     );
 
     res.status(201).json({
@@ -78,7 +78,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
     const token = jwt.sign(
       { id: user._id, email: user.email, role: user.role },
       process.env.JWT_SECRET!,
-      { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
+      { expiresIn: process.env.JWT_EXPIRES_IN || '7d' } as any
     );
 
     res.json({
@@ -106,7 +106,7 @@ export const refreshToken = async (req: Request, res: Response, next: NextFuncti
     const newToken = jwt.sign(
       { id: decoded.id, email: decoded.email, role: decoded.role },
       process.env.JWT_SECRET!,
-      { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
+      { expiresIn: process.env.JWT_EXPIRES_IN || '7d' } as any
     );
 
     res.json({ success: true, data: { token: newToken } });
