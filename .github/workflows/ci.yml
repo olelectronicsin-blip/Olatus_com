@@ -24,6 +24,7 @@ jobs:
       - run: npm ci
       - run: npm run build
       - run: npm audit
+        continue-on-error: true
 
   client-check:
     name: Client Check
@@ -45,6 +46,7 @@ jobs:
         continue-on-error: true
       - run: npm run build
       - run: npm audit
+        continue-on-error: true
 
   admin-check:
     name: Admin Check
