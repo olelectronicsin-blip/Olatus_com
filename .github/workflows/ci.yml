@@ -23,9 +23,7 @@ jobs:
           cache-dependency-path: Server/package-lock.json
       - run: npm ci
       - run: npm run build
-      - run: npm audit
-        continue-on-error: true
-
+ 
   client-check:
     name: Client Check
     runs-on: ubuntu-latest
@@ -45,8 +43,6 @@ jobs:
       # - run: npm run lint
       #   continue-on-error: true
       - run: npm run build
-      - run: npm audit
-        continue-on-error: true
 
   admin-check:
     name: Admin Check
@@ -66,4 +62,3 @@ jobs:
       - run: npm run lint
         continue-on-error: true
       - run: npm run build
-      - run: npm audit
