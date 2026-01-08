@@ -34,13 +34,18 @@ const Navbar = () => {
     { label: 'Home', href: '#home' },
     { label: 'Services', href: '#services', hasDropdown: true },
     { label: 'Projects', href: '#projects' },
-    { label: 'Shop', href: '#shop' },
+    { label: 'Shop', href: 'https://olelectronics.in/?srsltid=AfmBOoq1W3V7CXDcFu_IZACnPJVgNbzUIBoK1lI-NmjnWGxlFDwbGDdo' },
     { label: 'Training & Internship', href: '/careers#training' },
     { label: 'Contact', href: '#contact' },
     { label: 'About', href: '/about' },
   ];
 
   const handleNavClick = (href: string) => {
+    if (href.startsWith('http')) {
+      window.open(href, '_blank');
+      return;
+    }
+
     if (href.startsWith('#')) {
       // If we're not on home page, navigate to home first
       if (location.pathname !== '/') {
@@ -73,11 +78,10 @@ const Navbar = () => {
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled
           ? 'bg-[#002E3C]/95 backdrop-blur-md shadow-lg shadow-cyan-500/10'
           : 'bg-transparent'
-      }`}
+        }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
@@ -90,7 +94,7 @@ const Navbar = () => {
           <div className="hidden md:flex items-center gap-8">
             {navItems.map((item) => (
               item.hasDropdown ? (
-                <div 
+                <div
                   key={item.label}
                   className="relative group"
                   onMouseEnter={() => setIsServicesOpen(true)}
@@ -104,11 +108,10 @@ const Navbar = () => {
                     <ChevronDown size={16} className={`transition-transform duration-300 ${isServicesOpen ? 'rotate-180' : ''}`} />
                     <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-cyan-400 to-purple-600 group-hover:w-full transition-all duration-300"></span>
                   </button>
-                  
+
                   {/* Dropdown Menu */}
-                  <div className={`absolute top-full left-0 mt-2 w-64 bg-[#002E3C]/95 backdrop-blur-md rounded-lg shadow-xl border border-cyan-500/20 overflow-hidden transition-all duration-300 ${
-                    isServicesOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-2'
-                  }`}>
+                  <div className={`absolute top-full left-0 mt-2 w-64 bg-[#002E3C]/95 backdrop-blur-md rounded-lg shadow-xl border border-cyan-500/20 overflow-hidden transition-all duration-300 ${isServicesOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-2'
+                    }`}>
                     {serviceSubItems.map((subItem) => (
                       <button
                         key={subItem.name}
@@ -133,7 +136,7 @@ const Navbar = () => {
             ))}
           </div>
 
-          <button 
+          <button
             onClick={openContactModal}
             className="hidden md:block px-6 py-3 bg-gradient-to-r from-orange-500 to-pink-600 text-white font-semibold rounded-lg hover:shadow-lg hover:shadow-orange-500/50 transition-all duration-300 transform hover:scale-105"
           >
@@ -192,7 +195,7 @@ const Navbar = () => {
                 </button>
               )
             ))}
-            <button 
+            <button
               onClick={() => {
                 openContactModal();
                 setIsMobileMenuOpen(false);

@@ -5,6 +5,7 @@ import { User } from '../models/User.js';
 import { Project } from '../models/Project.js';
 import { ServiceRequest } from '../models/service-request.model.js';
 import { InternshipApplication } from '../models/InternshipApplication.js';
+import { Contact } from '../models/Contact.js';
 
 dotenv.config();
 
@@ -19,7 +20,7 @@ async function seedDatabase() {
 
   try {
     const existingAdmin = await User.findOne({ email: process.env.ADMIN_EMAIL || 'admin@olatus.com' });
-    
+
     if (existingAdmin) {
       console.log('Admin user already exists:', existingAdmin.email);
     } else {
@@ -72,7 +73,7 @@ async function seedDatabase() {
   for (const project of projects) {
     try {
       const existingProject = await Project.findOne({ title: project.title });
-      
+
       if (existingProject) {
         console.log(`Project already exists: ${project.title}`);
       } else {
@@ -159,11 +160,11 @@ async function seedDatabase() {
 
   for (const request of serviceRequests) {
     try {
-      const existing = await ServiceRequest.findOne({ 
-        email: request.email, 
-        projectName: request.projectName 
+      const existing = await ServiceRequest.findOne({
+        email: request.email,
+        projectName: request.projectName
       });
-      
+
       if (existing) {
         console.log(`Service request already exists: ${request.projectName}`);
       } else {
@@ -268,7 +269,7 @@ async function seedDatabase() {
   for (const application of internshipApplications) {
     try {
       const existing = await InternshipApplication.findOne({ email: application.email });
-      
+
       if (existing) {
         console.log(`Internship application already exists: ${application.email}`);
       } else {
@@ -277,6 +278,50 @@ async function seedDatabase() {
       }
     } catch (error) {
       console.error(`Error creating internship application:`, error);
+    }
+  }
+
+  // Seed sample contacts
+  const contacts = [
+    {
+      name: 'Rahul Sharma',
+      email: 'rahul.sharma@example.com',
+      phone: '+91 98765 43210',
+      company: 'InnovateTech',
+      subject: 'Partnership Inquiry',
+      message: 'We are interested in partnering with Olatus for our new IoT project. Please let us know if you are available for a call.',
+      status: 'new'
+    },
+    {
+      name: 'Anita Desai',
+      email: 'anita.d@designstudio.com',
+      phone: '+91 98765 67890',
+      subject: 'General Inquiry',
+      message: 'Do you provide consultation for small scale manufacturing setups?',
+      status: 'in-progress'
+    },
+    {
+      name: 'John Smith',
+      email: 'john.smith@globalcorp.com',
+      company: 'GlobalCorp',
+      subject: 'Product Demo Request',
+      message: 'We would like to see a demo of your smart home system.',
+      status: 'resolved'
+    }
+  ];
+
+  for (const contact of contacts) {
+    try {
+      const existing = await Contact.findOne({ email: contact.email, subject: contact.subject });
+
+      if (existing) {
+        console.log(`Contact inquiry already exists: ${contact.subject}`);
+      } else {
+        await Contact.create(contact);
+        console.log(`Contact inquiry created: ${contact.subject}`);
+      }
+    } catch (error) {
+      console.error(`Error creating contact inquiry:`, error);
     }
   }
 

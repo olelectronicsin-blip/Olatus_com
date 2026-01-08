@@ -1,7 +1,6 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Bot, MessageCircle, X, Send, Loader2 } from 'lucide-react';
-import type { SupabaseClient } from '@supabase/supabase-js';
-import { createClient } from '@supabase/supabase-js';
+import { submitContactForm } from '../lib/serviceApi';
 import { chatWithAI, type ChatMessage as ModelMessage } from '../lib/aiClient';
 
 type Lead = {
@@ -26,28 +25,7 @@ enum Step {
   Done = 'Done',
 }
 
-const getSupabase = (): SupabaseClient | null => {
-  const url = import.meta.env.VITE_SUPABASE_URL as string | undefined;
-  const key = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
-  if (!url || !key) return null;
-  try {
-    return createClient(url, key);
-  } catch (e) {
-    console.warn('Supabase init failed:', e);
-    return null;
-  }
-};
 
-const saveLeadLocally = (lead: Lead) => {
-  try {
-    const key = 'olatus_leads';
-    const existing = JSON.parse(localStorage.getItem(key) || '[]') as Lead[];
-    existing.push({ ...lead, created_at: new Date().toISOString() });
-    localStorage.setItem(key, JSON.stringify(existing));
-  } catch (e) {
-    console.warn('Local save failed', e);
-  }
-};
 
 const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 const validatePhone = (phone: string) => /[0-9]{7,}/.test(phone.replace(/\D/g, ''));
@@ -64,7 +42,7 @@ const FloatingBot = () => {
   const [leadDraft, setLeadDraft] = useState<Lead>({ name: '', email: undefined, phone: undefined, message: undefined });
   const chatEndRef = useRef<HTMLDivElement | null>(null);
 
-  const supabase = useMemo(() => getSupabase(), []);
+
 
   useEffect(() => {
     // Optionally open once per session after delay
@@ -105,12 +83,19 @@ const FloatingBot = () => {
   const submitLead = async (lead: Lead) => {
     setSubmitting(true);
     try {
-      if (supabase) {
-        const { error: dbErr } = await supabase.from('leads').insert(lead);
-        if (dbErr) throw dbErr;
-      } else {
-        saveLeadLocally(lead);
-      }
+      const nameParts = lead.name.trim().split(' ');
+      const firstName = nameParts[0];
+      const lastName = nameParts.slice(1).join(' ') || '.'; // Backend might trim, so '.' ensures non-empty if strictly required, but ' ' might be trimmed to empty.
+
+      await submitContactForm({
+        firstName,
+        lastName: lastName === '.' ? '' : lastName, // Actually, let's just send what we have. If lastName is empty, serviceApi joins them.
+        email: lead.email || `no-email-${Date.now()}@olatus.com`,
+        phone: lead.phone,
+        message: lead.message || 'Chatbot Inquiry',
+        subject: 'Chatbot Lead'
+      });
+
       enqueueBot('Thanks! Your details are saved. Our team will reach out soon.');
       setStep(Step.Done);
     } catch (err: unknown) {

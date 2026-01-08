@@ -52,19 +52,19 @@ const Contact = () => {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    
+
     // Client-side validation
     if (formData.message.trim().length < 10) {
       toast.error('Message must be at least 10 characters long');
       return;
     }
-    
+
     setIsSubmitting(true);
 
     try {
       await submitContactForm(formData);
       toast.success('Your message has been sent successfully! We\'ll get back to you soon.');
-      
+
       // Reset form
       setFormData({
         firstName: '',
@@ -168,25 +168,29 @@ const Contact = () => {
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-gray-400 text-sm mb-2">First Name</label>
+                  <label htmlFor="firstName" className="block text-gray-400 text-sm mb-2">First Name</label>
                   <input
+                    id="firstName"
                     type="text"
                     name="firstName"
                     value={formData.firstName}
                     onChange={handleInputChange}
                     placeholder="John"
+                    autoComplete="given-name"
                     required
                     className="w-full px-4 py-3 bg-[#002E3C]/60 backdrop-blur-sm border border-cyan-500/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-cyan-500/50 transition-colors"
                   />
                 </div>
                 <div>
-                  <label className="block text-gray-400 text-sm mb-2">Last Name</label>
+                  <label htmlFor="lastName" className="block text-gray-400 text-sm mb-2">Last Name</label>
                   <input
+                    id="lastName"
                     type="text"
                     name="lastName"
                     value={formData.lastName}
                     onChange={handleInputChange}
                     placeholder="Doe"
+                    autoComplete="family-name"
                     required
                     className="w-full px-4 py-3 bg-[#002E3C]/60 backdrop-blur-sm border border-cyan-500/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-cyan-500/50 transition-colors"
                   />
@@ -194,33 +198,38 @@ const Contact = () => {
               </div>
 
               <div>
-                <label className="block text-gray-400 text-sm mb-2">Email Address</label>
+                <label htmlFor="email" className="block text-gray-400 text-sm mb-2">Email Address</label>
                 <input
+                  id="email"
                   type="email"
                   name="email"
                   value={formData.email}
                   onChange={handleInputChange}
                   placeholder="john.doe@example.com"
+                  autoComplete="email"
                   required
-                    className="w-full px-4 py-3 bg-[#002E3C]/60 backdrop-blur-sm border border-cyan-500/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-cyan-500/50 transition-colors"
+                  className="w-full px-4 py-3 bg-[#002E3C]/60 backdrop-blur-sm border border-cyan-500/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-cyan-500/50 transition-colors"
                 />
               </div>
 
               <div>
-                <label className="block text-gray-400 text-sm mb-2">Phone Number</label>
+                <label htmlFor="phone" className="block text-gray-400 text-sm mb-2">Phone Number</label>
                 <input
+                  id="phone"
                   type="tel"
                   name="phone"
                   value={formData.phone}
                   onChange={handleInputChange}
                   placeholder="+91 98765 43210"
+                  autoComplete="tel"
                   className="w-full px-4 py-3 bg-[#002E3C] border border-cyan-500/20 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-cyan-500/50 transition-colors"
                 />
               </div>
 
               <div>
-                <label className="block text-gray-400 text-sm mb-2">Service Interested In</label>
-                <select 
+                <label htmlFor="service" className="block text-gray-400 text-sm mb-2">Service Interested In</label>
+                <select
+                  id="service"
                   name="service"
                   value={formData.service}
                   onChange={handleInputChange}
@@ -240,8 +249,9 @@ const Contact = () => {
               </div>
 
               <div>
-                <label className="block text-gray-400 text-sm mb-2">Message</label>
+                <label htmlFor="message" className="block text-gray-400 text-sm mb-2">Message</label>
                 <textarea
+                  id="message"
                   name="message"
                   value={formData.message}
                   onChange={handleInputChange}

@@ -1,15 +1,17 @@
-import { useState } from 'react';
+import { useState, ChangeEvent, FormEvent } from 'react';
 import Navbar from './Navbar';
 import Footer from './Footer';
+import toast, { Toaster } from 'react-hot-toast';
 import { useContactModal } from '../contexts/ContactModalContext';
-import { 
-  Lightbulb, 
-  Users, 
-  BookOpen, 
-  Target, 
-  Cpu, 
-  Wifi, 
-  Zap, 
+import { submitServiceRequest, ServiceType } from '../lib/serviceApi';
+import {
+  Lightbulb,
+  Users,
+  BookOpen,
+  Target,
+  Cpu,
+  Wifi,
+  Zap,
   Shield,
   CheckCircle,
   ChevronRight,
@@ -20,9 +22,84 @@ import {
 } from 'lucide-react';
 
 const TechnologyLab = () => {
-  const [expandedFAQ, setExpandedFAQ] = useState<number | null>(null);
-  const [activeCategory, setActiveCategory] = useState<'school' | 'college' | 'corporate'>('school');
   const { openContactModal } = useContactModal();
+  const [expandedFAQ, setExpandedFAQ] = useState<number | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [activeCategory, setActiveCategory] = useState<'school' | 'college' | 'corporate'>('school');
+
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    institution: '',
+    labType: '',
+    budget: '',
+    requirements: '',
+  });
+
+  const [files, setFiles] = useState<File[]>([]);
+
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      setFiles(Array.from(e.target.files));
+    }
+  };
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    try {
+      await submitServiceRequest({
+        customerName: `${formData.firstName} ${formData.lastName}`.trim(),
+        email: formData.email,
+        phone: formData.phone,
+        serviceType: ServiceType.LAB_SETUP,
+        description: formData.requirements,
+        specifications: {
+          institution: formData.institution,
+          labType: formData.labType,
+          budget: formData.budget,
+        },
+        files: files
+      });
+
+      toast.success('Your request has been submitted successfully!');
+
+      // Reset form
+      setFormData({
+        firstName: '',
+        lastName: '',
+        email: '',
+        phone: '',
+        institution: '',
+        labType: '',
+        budget: '',
+        requirements: '',
+      });
+      setFiles([]);
+
+      // Reset file input manually if needed, or rely on state reset
+      const fileInput = document.getElementById('file-upload') as HTMLInputElement;
+      if (fileInput) fileInput.value = '';
+
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to submit request');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
 
   const labTypes = [
     {
@@ -194,7 +271,8 @@ const TechnologyLab = () => {
   return (
     <div className="bg-gradient-to-b from-[#001a24] via-[#002E3C] to-[#001a24] min-h-screen">
       <Navbar />
-      
+      <Toaster position="top-right" />
+
       {/* Hero Section with Animated Elements */}
       <section className="relative pt-32 pb-20 overflow-hidden">
         {/* Animated Background */}
@@ -204,7 +282,7 @@ const TechnologyLab = () => {
           <div className="absolute top-40 right-20 w-96 h-96 bg-purple-600/20 rounded-full filter blur-3xl animate-blob animation-delay-2000"></div>
           <div className="absolute bottom-20 left-1/2 w-80 h-80 bg-pink-500/20 rounded-full filter blur-3xl animate-blob animation-delay-4000"></div>
         </div>
-        
+
         {/* Floating Icons Animation */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-1/4 left-1/4 animate-float">
@@ -217,7 +295,7 @@ const TechnologyLab = () => {
             <Zap className="w-14 h-14 text-orange-400/30" />
           </div>
         </div>
-        
+
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center">
             <div className="inline-block mb-6 animate-bounce-slow">
@@ -225,7 +303,7 @@ const TechnologyLab = () => {
                 <Lightbulb className="w-16 h-16 text-cyan-400" />
               </div>
             </div>
-            
+
             <h1 className="text-5xl md:text-7xl font-bold mb-6">
               <span className="bg-gradient-to-r from-cyan-400 via-purple-500 to-pink-600 text-transparent bg-clip-text animate-gradient">
                 Technology Lab
@@ -235,18 +313,18 @@ const TechnologyLab = () => {
               Establishment Services
             </h2>
             <p className="text-xl text-gray-300 max-w-4xl mx-auto mb-8 leading-relaxed">
-              Transform your educational institution or organization with a state-of-the-art technology lab. 
+              Transform your educational institution or organization with a state-of-the-art technology lab.
               We design, build, and maintain cutting-edge labs that inspire innovation and hands-on learning.
             </p>
             <div className="flex flex-wrap gap-4 justify-center">
-              <button 
+              <button
                 onClick={openContactModal}
                 className="px-8 py-4 bg-gradient-to-r from-cyan-500 to-purple-600 text-white font-semibold rounded-lg hover:shadow-lg hover:shadow-cyan-500/50 transition-all duration-300 transform hover:scale-105 flex items-center gap-2"
               >
                 Get Started
                 <ChevronRight size={20} />
               </button>
-              <a 
+              <a
                 href="#lab-types"
                 className="px-8 py-4 bg-white/10 backdrop-blur-sm text-white font-semibold rounded-lg border border-cyan-500/30 hover:border-cyan-500/60 transition-all duration-300 transform hover:scale-105"
               >
@@ -268,28 +346,26 @@ const TechnologyLab = () => {
             </h2>
             <p className="text-xl text-gray-300">Customized solutions for every educational level</p>
           </div>
-          
+
           <div className="grid md:grid-cols-3 gap-8 mb-16">
             {labTypes.map((lab, index) => (
-              <div 
+              <div
                 key={index}
                 onClick={() => setActiveCategory(lab.category as 'school' | 'college' | 'corporate')}
-                className={`group relative bg-[#002E3C]/50 backdrop-blur-sm rounded-2xl p-8 border transition-all duration-500 cursor-pointer transform hover:scale-105 ${
-                  activeCategory === lab.category 
-                    ? 'border-cyan-500 shadow-lg shadow-cyan-500/50' 
-                    : 'border-cyan-500/20 hover:border-cyan-500/50'
-                }`}
+                className={`group relative bg-[#002E3C]/50 backdrop-blur-sm rounded-2xl p-8 border transition-all duration-500 cursor-pointer transform hover:scale-105 ${activeCategory === lab.category
+                  ? 'border-cyan-500 shadow-lg shadow-cyan-500/50'
+                  : 'border-cyan-500/20 hover:border-cyan-500/50'
+                  }`}
               >
-                <div className={`flex justify-center mb-6 transition-transform duration-500 ${
-                  activeCategory === lab.category ? 'scale-110' : ''
-                }`}>
+                <div className={`flex justify-center mb-6 transition-transform duration-500 ${activeCategory === lab.category ? 'scale-110' : ''
+                  }`}>
                   <div className={`p-4 bg-gradient-to-br ${lab.color} rounded-2xl text-white`}>
                     {lab.icon}
                   </div>
                 </div>
                 <h3 className="text-2xl font-bold text-white mb-3 text-center">{lab.title}</h3>
                 <p className="text-gray-300 text-center leading-relaxed">{lab.description}</p>
-                
+
                 {activeCategory === lab.category && (
                   <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2">
                     <div className="w-16 h-1 bg-gradient-to-r from-cyan-400 to-purple-600 rounded-full"></div>
@@ -309,7 +385,7 @@ const TechnologyLab = () => {
             </h3>
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
               {labEquipment[activeCategory].map((equipment, index) => (
-                <div 
+                <div
                   key={index}
                   className="flex items-center gap-3 bg-gradient-to-br from-cyan-500/10 to-purple-600/10 px-4 py-3 rounded-lg border border-cyan-500/20 hover:border-cyan-500/50 transition-all duration-300 group"
                   style={{ animationDelay: `${index * 50}ms` }}
@@ -334,10 +410,10 @@ const TechnologyLab = () => {
             </h2>
             <p className="text-xl text-gray-300">Comprehensive solutions for your technology lab needs</p>
           </div>
-          
+
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {features.map((feature, index) => (
-              <div 
+              <div
                 key={index}
                 className="group bg-[#002E3C]/50 backdrop-blur-sm rounded-2xl p-6 border border-cyan-500/20 hover:border-cyan-500/50 transition-all duration-500 hover:transform hover:scale-105"
                 style={{ animationDelay: `${index * 100}ms` }}
@@ -364,10 +440,10 @@ const TechnologyLab = () => {
             </h2>
             <p className="text-xl text-gray-300">From concept to completion in four simple steps</p>
           </div>
-          
+
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {setupProcess.map((step, index) => (
-              <div 
+              <div
                 key={index}
                 className="relative group"
               >
@@ -383,7 +459,7 @@ const TechnologyLab = () => {
                   <h3 className="text-xl font-bold text-white mb-3">{step.title}</h3>
                   <p className="text-gray-300 text-sm leading-relaxed">{step.description}</p>
                 </div>
-                
+
                 {/* Connecting Arrow */}
                 {index < setupProcess.length - 1 && (
                   <div className="hidden lg:block absolute top-1/2 -right-4 transform -translate-y-1/2 z-10">
@@ -406,16 +482,16 @@ const TechnologyLab = () => {
               </span>
             </h2>
           </div>
-          
+
           <div className="grid md:grid-cols-2 gap-8">
             {benefits.map((benefit, index) => (
-              <div 
+              <div
                 key={index}
                 className="group relative bg-[#002E3C]/50 backdrop-blur-sm rounded-2xl overflow-hidden border border-cyan-500/20 hover:border-cyan-500/50 transition-all duration-500 hover:transform hover:scale-105"
               >
                 <div className="relative h-64 overflow-hidden">
-                  <img 
-                    src={benefit.image} 
+                  <img
+                    src={benefit.image}
                     alt={benefit.title}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                   />
@@ -441,10 +517,10 @@ const TechnologyLab = () => {
               </span>
             </h2>
           </div>
-          
+
           <div className="space-y-4">
             {faqs.map((faq, index) => (
-              <div 
+              <div
                 key={index}
                 className="bg-[#002E3C]/50 backdrop-blur-sm rounded-xl overflow-hidden border border-cyan-500/20 hover:border-cyan-500/40 transition-all duration-300"
               >
@@ -453,16 +529,14 @@ const TechnologyLab = () => {
                   className="w-full px-6 py-5 flex items-center justify-between text-left hover:bg-cyan-500/5 transition-colors"
                 >
                   <span className="text-lg font-semibold text-white pr-4">{faq.question}</span>
-                  <ChevronRight 
-                    className={`text-cyan-400 flex-shrink-0 transition-transform duration-300 ${
-                      expandedFAQ === index ? 'rotate-90' : ''
-                    }`} 
-                    size={24} 
+                  <ChevronRight
+                    className={`text-cyan-400 flex-shrink-0 transition-transform duration-300 ${expandedFAQ === index ? 'rotate-90' : ''
+                      }`}
+                    size={24}
                   />
                 </button>
-                <div className={`overflow-hidden transition-all duration-300 ${
-                  expandedFAQ === index ? 'max-h-96' : 'max-h-0'
-                }`}>
+                <div className={`overflow-hidden transition-all duration-300 ${expandedFAQ === index ? 'max-h-96' : 'max-h-0'
+                  }`}>
                   <div className="px-6 pb-5">
                     <p className="text-gray-300 leading-relaxed">{faq.answer}</p>
                   </div>
@@ -488,20 +562,30 @@ const TechnologyLab = () => {
           </div>
 
           <div className="bg-[#002E3C]/50 backdrop-blur-sm rounded-2xl p-8 border border-cyan-500/20">
-            <form className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-gray-300 mb-2">First Name*</label>
-                  <input 
-                    type="text" 
+                  <label htmlFor="firstName" className="block text-gray-300 mb-2">First Name*</label>
+                  <input
+                    id="firstName"
+                    name="firstName"
+                    value={formData.firstName}
+                    onChange={handleInputChange}
+                    type="text"
+                    autoComplete="given-name"
                     className="w-full px-4 py-3 bg-[#001a24] border border-cyan-500/30 rounded-lg focus:outline-none focus:border-cyan-400 text-white transition-all duration-300"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-gray-300 mb-2">Last Name*</label>
-                  <input 
-                    type="text" 
+                  <label htmlFor="lastName" className="block text-gray-300 mb-2">Last Name*</label>
+                  <input
+                    id="lastName"
+                    name="lastName"
+                    value={formData.lastName}
+                    onChange={handleInputChange}
+                    type="text"
+                    autoComplete="family-name"
                     className="w-full px-4 py-3 bg-[#001a24] border border-cyan-500/30 rounded-lg focus:outline-none focus:border-cyan-400 text-white transition-all duration-300"
                     required
                   />
@@ -509,35 +593,53 @@ const TechnologyLab = () => {
               </div>
 
               <div>
-                <label className="block text-gray-300 mb-2">Email address*</label>
-                <input 
-                  type="email" 
+                <label htmlFor="email" className="block text-gray-300 mb-2">Email address*</label>
+                <input
+                  id="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  type="email"
+                  autoComplete="email"
                   className="w-full px-4 py-3 bg-[#001a24] border border-cyan-500/30 rounded-lg focus:outline-none focus:border-cyan-400 text-white transition-all duration-300"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-gray-300 mb-2">Phone No*</label>
-                <input 
-                  type="tel" 
+                <label htmlFor="phone" className="block text-gray-300 mb-2">Phone No*</label>
+                <input
+                  id="phone"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleInputChange}
+                  type="tel"
+                  autoComplete="tel"
                   className="w-full px-4 py-3 bg-[#001a24] border border-cyan-500/30 rounded-lg focus:outline-none focus:border-cyan-400 text-white transition-all duration-300"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-gray-300 mb-2">Institution/Organization Name*</label>
-                <input 
-                  type="text" 
+                <label htmlFor="institution" className="block text-gray-300 mb-2">Institution/Organization Name*</label>
+                <input
+                  id="institution"
+                  name="institution"
+                  value={formData.institution}
+                  onChange={handleInputChange}
+                  type="text"
                   className="w-full px-4 py-3 bg-[#001a24] border border-cyan-500/30 rounded-lg focus:outline-none focus:border-cyan-400 text-white transition-all duration-300"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-gray-300 mb-2">Lab Type*</label>
-                <select 
+                <label htmlFor="labType" className="block text-gray-300 mb-2">Lab Type*</label>
+                <select
+                  id="labType"
+                  name="labType"
+                  value={formData.labType}
+                  onChange={handleInputChange}
                   className="w-full px-4 py-3 bg-[#001a24] border border-cyan-500/30 rounded-lg focus:outline-none focus:border-cyan-400 text-white transition-all duration-300"
                   required
                 >
@@ -550,8 +652,12 @@ const TechnologyLab = () => {
               </div>
 
               <div>
-                <label className="block text-gray-300 mb-2">Expected Budget Range</label>
-                <select 
+                <label htmlFor="budget" className="block text-gray-300 mb-2">Expected Budget Range</label>
+                <select
+                  id="budget"
+                  name="budget"
+                  value={formData.budget}
+                  onChange={handleInputChange}
                   className="w-full px-4 py-3 bg-[#001a24] border border-cyan-500/30 rounded-lg focus:outline-none focus:border-cyan-400 text-white transition-all duration-300"
                 >
                   <option value="">Please select</option>
@@ -563,8 +669,12 @@ const TechnologyLab = () => {
               </div>
 
               <div>
-                <label className="block text-gray-300 mb-2">Describe Your Requirements*</label>
-                <textarea 
+                <label htmlFor="requirements" className="block text-gray-300 mb-2">Describe Your Requirements*</label>
+                <textarea
+                  id="requirements"
+                  name="requirements"
+                  value={formData.requirements}
+                  onChange={handleInputChange}
                   rows={5}
                   className="w-full px-4 py-3 bg-[#001a24] border border-cyan-500/30 rounded-lg focus:outline-none focus:border-cyan-400 text-white resize-none transition-all duration-300"
                   placeholder="Tell us about your lab requirements, space available, timeline, etc."
@@ -573,19 +683,22 @@ const TechnologyLab = () => {
               </div>
 
               <div>
-                <label className="block text-gray-300 mb-2">Upload Documents (Floor plan, Requirements, etc.)</label>
-                <input 
-                  type="file" 
+                <label htmlFor="file-upload" className="block text-gray-300 mb-2">Upload Documents (Floor plan, Requirements, etc.)</label>
+                <input
+                  id="file-upload"
+                  type="file"
                   multiple
+                  onChange={handleFileChange}
                   className="w-full px-4 py-3 bg-[#001a24] border border-cyan-500/30 rounded-lg focus:outline-none focus:border-cyan-400 text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-cyan-500/20 file:text-cyan-400 hover:file:bg-cyan-500/30 transition-all duration-300"
                 />
               </div>
 
-              <button 
+              <button
                 type="submit"
-                className="w-full px-8 py-4 bg-gradient-to-r from-cyan-500 to-purple-600 text-white font-semibold rounded-lg hover:shadow-lg hover:shadow-cyan-500/50 transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-2"
+                disabled={isSubmitting}
+                className="w-full px-8 py-4 bg-gradient-to-r from-cyan-500 to-purple-600 text-white font-semibold rounded-lg hover:shadow-lg hover:shadow-cyan-500/50 transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Submit Request
+                {isSubmitting ? 'Submitting...' : 'Submit Request'}
                 <ChevronRight size={20} />
               </button>
             </form>
@@ -594,7 +707,7 @@ const TechnologyLab = () => {
       </section>
 
       <Footer />
-      
+
       {/* Custom CSS for animations */}
       <style>{`
         @keyframes blob {

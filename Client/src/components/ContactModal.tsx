@@ -1,5 +1,7 @@
 import { X, Send } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import toast, { Toaster } from 'react-hot-toast';
+import { submitContactForm } from '../lib/serviceApi';
 
 interface ContactModalProps {
   isOpen: boolean;
@@ -7,6 +9,7 @@ interface ContactModalProps {
 }
 
 const ContactModal = ({ isOpen, onClose }: ContactModalProps) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -28,12 +31,40 @@ const ContactModal = ({ isOpen, onClose }: ContactModalProps) => {
     };
   }, [isOpen]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission here
-    console.log('Form submitted:', formData);
-    // You can add your API call here
-    onClose();
+
+    if (formData.message.trim().length < 10) {
+      toast.error('Message must be at least 10 characters long');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      await submitContactForm(formData);
+      toast.success('Message sent successfully!');
+
+      // Reset form
+      setFormData({
+        firstName: '',
+        lastName: '',
+        email: '',
+        phone: '',
+        service: '',
+        message: '',
+      });
+
+      // Close modal after a short delay to let user see success message
+      setTimeout(() => {
+        onClose();
+      }, 2000);
+    } catch (error) {
+      console.error('Error submitting contact form:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to send message. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -52,6 +83,7 @@ const ContactModal = ({ isOpen, onClose }: ContactModalProps) => {
         className="absolute inset-0 bg-black/70 backdrop-blur-sm"
         onClick={onClose}
       ></div>
+      <Toaster position="top-right" />
 
       {/* Modal */}
       <div className="relative w-full max-w-4xl bg-[#001a24] rounded-2xl border border-cyan-500/30 shadow-2xl shadow-cyan-500/20 animate-slideUp">
@@ -91,6 +123,7 @@ const ContactModal = ({ isOpen, onClose }: ContactModalProps) => {
                 value={formData.firstName}
                 onChange={handleChange}
                 placeholder="John"
+                autoComplete="given-name"
                 required
                 className="w-full px-3 py-2 sm:px-4 sm:py-2.5 text-sm sm:text-base bg-[#002E3C]/60 backdrop-blur-sm border border-cyan-500/20 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all"
               />
@@ -106,6 +139,7 @@ const ContactModal = ({ isOpen, onClose }: ContactModalProps) => {
                 value={formData.lastName}
                 onChange={handleChange}
                 placeholder="Doe"
+                autoComplete="family-name"
                 required
                 className="w-full px-3 py-2 sm:px-4 sm:py-2.5 text-sm sm:text-base bg-[#002E3C]/60 backdrop-blur-sm border border-cyan-500/20 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all"
               />
@@ -123,6 +157,7 @@ const ContactModal = ({ isOpen, onClose }: ContactModalProps) => {
                 value={formData.email}
                 onChange={handleChange}
                 placeholder="john.doe@example.com"
+                autoComplete="email"
                 required
                 className="w-full px-3 py-2 sm:px-4 sm:py-2.5 text-sm sm:text-base bg-[#002E3C]/60 backdrop-blur-sm border border-cyan-500/20 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all"
               />
@@ -140,6 +175,7 @@ const ContactModal = ({ isOpen, onClose }: ContactModalProps) => {
                 value={formData.phone}
                 onChange={handleChange}
                 placeholder="+91 98765 43210"
+                autoComplete="tel"
                 required
                 className="w-full px-3 py-2 sm:px-4 sm:py-2.5 text-sm sm:text-base bg-[#002E3C]/60 backdrop-blur-sm border border-cyan-500/20 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all"
               />
@@ -199,9 +235,10 @@ const ContactModal = ({ isOpen, onClose }: ContactModalProps) => {
           {/* Submit Button */}
           <button
             type="submit"
-            className="w-full mt-5 sm:mt-6 py-3 sm:py-3.5 bg-gradient-to-r from-cyan-500 to-purple-600 text-white font-semibold rounded-lg hover:shadow-lg hover:shadow-cyan-500/50 transition-all duration-300 flex items-center justify-center gap-2 group text-sm sm:text-base"
+            disabled={isSubmitting}
+            className="w-full mt-5 sm:mt-6 py-3 sm:py-3.5 bg-gradient-to-r from-cyan-500 to-purple-600 text-white font-semibold rounded-lg hover:shadow-lg hover:shadow-cyan-500/50 transition-all duration-300 flex items-center justify-center gap-2 group text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Send Message
+            {isSubmitting ? 'Sending...' : 'Send Message'}
             <Send className="group-hover:translate-x-1 transition-transform" size={18} />
           </button>
         </form>
