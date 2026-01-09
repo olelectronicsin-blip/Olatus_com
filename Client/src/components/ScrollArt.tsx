@@ -215,7 +215,7 @@ const ScrollArt: React.FC = () => {
       const sweepY = h * (0.85 - 0.6 * smooth);
       const sweep = ctx.createLinearGradient(0, sweepY - 40 * DPR, 0, sweepY + 40 * DPR);
       sweep.addColorStop(0, 'rgba(34,211,238,0)');
-      sweep.addColorStop(0.5, 'rgba(34,211,238,0.1)');
+      sweep.addColorStop(0.5, 'rgba(34,211,238,0)');
       sweep.addColorStop(1, 'rgba(34,211,238,0)');
       ctx.fillStyle = sweep;
       ctx.fillRect(0, sweepY - 60 * DPR, w, 120 * DPR);

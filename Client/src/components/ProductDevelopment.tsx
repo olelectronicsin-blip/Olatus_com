@@ -7,6 +7,100 @@ import { useContactModal } from '../contexts/ContactModalContext';
 const ProductDevelopment = () => {
   const [expandedFAQ, setExpandedFAQ] = useState<number | null>(null);
   const { openContactModal } = useContactModal();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<{ type: 'success' | 'error' | null; message: string }>({ type: null, message: '' });
+
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    company: '',
+    projectType: 'Product Development',
+    description: '',
+    files: null as FileList | null
+  });
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setFormData(prev => ({ ...prev, files: e.target.files }));
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setSubmitStatus({ type: null, message: '' });
+
+    try {
+      const data = new FormData();
+      data.append('customerName', `${formData.firstName} ${formData.lastName}`);
+      data.append('email', formData.email);
+      data.append('phone', formData.phone);
+      // Map projectType to valid backend Enum
+      let serviceType = 'PRODUCT_DEVELOPMENT';
+      if (formData.projectType === 'PCB Design') {
+        serviceType = 'PCB_DESIGN';
+      }
+      // 'Product Development', 'Component Sourcing', 'Prototyping', 'Manufacturing' 
+      // all fall under PRODUCT_DEVELOPMENT with specific details in specifications
+
+      data.append('serviceType', serviceType);
+      data.append('description', formData.description);
+
+      const specifications = {
+        company: formData.company,
+        projectType: formData.projectType, // Keep the original specific selection here
+        source: 'Product Development Page'
+      };
+      data.append('specifications', JSON.stringify(specifications));
+
+      if (formData.files) {
+        Array.from(formData.files).forEach(file => {
+          data.append('files', file);
+        });
+      }
+
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/service-requests`, {
+        method: 'POST',
+        body: data,
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        setSubmitStatus({
+          type: 'success',
+          message: 'Thank you! Your request has been submitted successfully. Our team will contact you shortly.'
+        });
+        setFormData({
+          firstName: '',
+          lastName: '',
+          email: '',
+          phone: '',
+          company: '',
+          projectType: 'Product Development',
+          description: '',
+          files: null
+        });
+      } else {
+        throw new Error(result.message || 'Submission failed');
+      }
+    } catch (error) {
+      console.error('Submission error:', error);
+      setSubmitStatus({
+        type: 'error',
+        message: 'Something went wrong. Please try again or contact us directly.'
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const services = [
     {
@@ -81,13 +175,13 @@ const ProductDevelopment = () => {
   ];
 
   const portfolio = [
-    { 
-      title: 'S GUARD', 
+    {
+      title: 'S GUARD',
       subtitle: 'S GUARD SECURITY SYSTEM',
       image: 'https://images.unsplash.com/photo-1558002038-1055907df827?w=600&h=400&fit=crop'
     },
-    { 
-      title: 'EXPLORER KIT ROBOTICS DIY', 
+    {
+      title: 'EXPLORER KIT ROBOTICS DIY',
       subtitle: 'EXPLORER KIT ROBOTICS DIY',
       image: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=600&h=400&fit=crop'
     }
@@ -99,29 +193,29 @@ const ProductDevelopment = () => {
       <div className="fixed inset-0 opacity-5 pointer-events-none">
         <div className="absolute top-20 left-20">
           <svg width="200" height="200" viewBox="0 0 100 100" className="animate-spin-slow">
-            <circle cx="50" cy="50" r="30" fill="none" stroke="currentColor" strokeWidth="2" className="text-cyan-400"/>
-            <circle cx="50" cy="20" r="5" fill="currentColor" className="text-cyan-400"/>
-            <circle cx="80" cy="50" r="5" fill="currentColor" className="text-cyan-400"/>
-            <circle cx="50" cy="80" r="5" fill="currentColor" className="text-cyan-400"/>
-            <circle cx="20" cy="50" r="5" fill="currentColor" className="text-cyan-400"/>
+            <circle cx="50" cy="50" r="30" fill="none" stroke="currentColor" strokeWidth="2" className="text-cyan-400" />
+            <circle cx="50" cy="20" r="5" fill="currentColor" className="text-cyan-400" />
+            <circle cx="80" cy="50" r="5" fill="currentColor" className="text-cyan-400" />
+            <circle cx="50" cy="80" r="5" fill="currentColor" className="text-cyan-400" />
+            <circle cx="20" cy="50" r="5" fill="currentColor" className="text-cyan-400" />
           </svg>
         </div>
         <div className="absolute bottom-40 right-40">
           <svg width="150" height="150" viewBox="0 0 100 100" className="animate-spin-reverse">
-            <circle cx="50" cy="50" r="25" fill="none" stroke="currentColor" strokeWidth="2" className="text-purple-400"/>
-            <circle cx="50" cy="25" r="4" fill="currentColor" className="text-purple-400"/>
-            <circle cx="75" cy="50" r="4" fill="currentColor" className="text-purple-400"/>
-            <circle cx="50" cy="75" r="4" fill="currentColor" className="text-purple-400"/>
-            <circle cx="25" cy="50" r="4" fill="currentColor" className="text-purple-400"/>
+            <circle cx="50" cy="50" r="25" fill="none" stroke="currentColor" strokeWidth="2" className="text-purple-400" />
+            <circle cx="50" cy="25" r="4" fill="currentColor" className="text-purple-400" />
+            <circle cx="75" cy="50" r="4" fill="currentColor" className="text-purple-400" />
+            <circle cx="50" cy="75" r="4" fill="currentColor" className="text-purple-400" />
+            <circle cx="25" cy="50" r="4" fill="currentColor" className="text-purple-400" />
           </svg>
         </div>
         <div className="absolute top-1/2 left-1/2">
           <svg width="180" height="180" viewBox="0 0 100 100" className="animate-spin-slow">
-            <circle cx="50" cy="50" r="28" fill="none" stroke="currentColor" strokeWidth="2" className="text-orange-400"/>
-            <circle cx="50" cy="22" r="4" fill="currentColor" className="text-orange-400"/>
-            <circle cx="78" cy="50" r="4" fill="currentColor" className="text-orange-400"/>
-            <circle cx="50" cy="78" r="4" fill="currentColor" className="text-orange-400"/>
-            <circle cx="22" cy="50" r="4" fill="currentColor" className="text-orange-400"/>
+            <circle cx="50" cy="50" r="28" fill="none" stroke="currentColor" strokeWidth="2" className="text-orange-400" />
+            <circle cx="50" cy="22" r="4" fill="currentColor" className="text-orange-400" />
+            <circle cx="78" cy="50" r="4" fill="currentColor" className="text-orange-400" />
+            <circle cx="50" cy="78" r="4" fill="currentColor" className="text-orange-400" />
+            <circle cx="22" cy="50" r="4" fill="currentColor" className="text-orange-400" />
           </svg>
         </div>
       </div>
@@ -129,8 +223,8 @@ const ProductDevelopment = () => {
       {/* Flowing Data Lines */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <svg className="w-full h-full opacity-10">
-          <line x1="0" y1="0" x2="100%" y2="100%" stroke="currentColor" strokeWidth="1" className="text-cyan-400 animate-flow-diagonal"/>
-          <line x1="100%" y1="0" x2="0" y2="100%" stroke="currentColor" strokeWidth="1" className="text-purple-400 animate-flow-diagonal animation-delay-2000"/>
+          <line x1="0" y1="0" x2="100%" y2="100%" stroke="currentColor" strokeWidth="1" className="text-cyan-400 animate-flow-diagonal" />
+          <line x1="100%" y1="0" x2="0" y2="100%" stroke="currentColor" strokeWidth="1" className="text-purple-400 animate-flow-diagonal animation-delay-2000" />
         </svg>
       </div>
 
@@ -148,7 +242,7 @@ const ProductDevelopment = () => {
       </div>
 
       <Navbar />
-      
+
       {/* Hero Section */}
       <section className="relative pt-32 pb-20 overflow-hidden">
         <div className="absolute inset-0">
@@ -157,7 +251,7 @@ const ProductDevelopment = () => {
           <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-600/20 rounded-full filter blur-3xl animate-blob animation-delay-2000"></div>
           <div className="absolute top-1/2 right-1/4 w-80 h-80 bg-orange-500/20 rounded-full filter blur-3xl animate-blob animation-delay-4000"></div>
         </div>
-        
+
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center">
             <h1 className="text-4xl md:text-6xl font-bold mb-4 text-white">
@@ -174,7 +268,7 @@ const ProductDevelopment = () => {
             <p className="text-xl text-gray-300 max-w-4xl mx-auto mb-8 leading-relaxed">
               Turn your idea into reality by Partnering with us into making your Product Design to Prototyping to Product Manufacturing. We are here to support you from Component Sourcing till Full scale Product final Production.
             </p>
-            <button 
+            <button
               onClick={openContactModal}
               className="inline-block px-8 py-4 bg-gradient-to-r from-cyan-500 to-purple-600 text-white font-semibold rounded-lg hover:shadow-lg hover:shadow-cyan-500/50 transition-all duration-300 transform hover:scale-105"
             >
@@ -189,9 +283,9 @@ const ProductDevelopment = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <div className="inline-flex items-center gap-3 mb-4">
-              <img 
-                src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=100&h=100&fit=crop" 
-                alt="Idea" 
+              <img
+                src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=100&h=100&fit=crop"
+                alt="Idea"
                 className="w-16 h-16 rounded-full object-cover border-2 border-cyan-400"
               />
               <span className="text-4xl font-bold bg-gradient-to-r from-cyan-400 to-purple-600 text-transparent bg-clip-text">
@@ -202,10 +296,10 @@ const ProductDevelopment = () => {
               Make Your Product Market Ready
             </h2>
           </div>
-          
+
           <div className="grid md:grid-cols-3 gap-8">
             {services.map((service, index) => (
-              <div 
+              <div
                 key={index}
                 className="bg-[#002E3C]/50 backdrop-blur-sm rounded-xl p-8 border border-cyan-500/20 hover:border-cyan-500/50 transition-all duration-300 hover:transform hover:scale-105 text-center"
               >
@@ -225,7 +319,7 @@ const ProductDevelopment = () => {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="space-y-6">
             {faqs.map((faq, index) => (
-              <div 
+              <div
                 key={index}
                 className="bg-[#002E3C]/50 backdrop-blur-sm rounded-xl overflow-hidden border border-cyan-500/20"
               >
@@ -234,11 +328,10 @@ const ProductDevelopment = () => {
                   className="w-full px-6 py-5 flex items-center justify-between text-left hover:bg-cyan-500/5 transition-colors"
                 >
                   <span className="text-lg font-bold text-white pr-4">{faq.question}</span>
-                  <ChevronRight 
-                    className={`text-cyan-400 flex-shrink-0 transition-transform duration-300 ${
-                      expandedFAQ === index ? 'rotate-90' : ''
-                    }`} 
-                    size={24} 
+                  <ChevronRight
+                    className={`text-cyan-400 flex-shrink-0 transition-transform duration-300 ${expandedFAQ === index ? 'rotate-90' : ''
+                      }`}
+                    size={24}
                   />
                 </button>
                 {expandedFAQ === index && (
@@ -268,24 +361,24 @@ const ProductDevelopment = () => {
             <h3 className="text-3xl font-bold text-white mb-6 text-center">
               Professional Hardware Customization on Demand
             </h3>
-            
+
             <div className="space-y-4 text-gray-300 leading-relaxed max-w-4xl mx-auto">
               <p>
                 We provide hardware customization service as per the requirement and project type. We provide customization as efficiently as possible so that the system works in the most efficient way.
               </p>
-              
+
               <p>
                 Apart from customization, we provide integrated Printed Circuit Board Designing, fabrication and Assemble for the customization hardware project.
               </p>
-              
+
               <p>
                 The customer can also order prototype outer casing and layout for the custom hardware which we will provide in a 3D printed way. If, satisfied, we can go for the final Molding of the design and make the hardware circuit or product market ready.
               </p>
-              
+
               <p className="font-semibold text-white">
                 So, in short we can customize, design, model and manufacture according to the need of our customer.
               </p>
-              
+
               <p>
                 We also have a range of White Labelled products which can be rebranded into your brand name and can be sold off. So now get exclusive products in your brand and boost your sales.
               </p>
@@ -298,7 +391,7 @@ const ProductDevelopment = () => {
               </h4>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {sectors.map((sector, index) => (
-                  <div 
+                  <div
                     key={index}
                     className="flex items-center gap-2 bg-cyan-500/10 px-4 py-3 rounded-lg border border-cyan-500/20 hover:border-cyan-500/50 transition-colors"
                   >
@@ -329,13 +422,13 @@ const ProductDevelopment = () => {
                   OLatus
                 </span>
               </div>
-              <img 
-                src="https://images.unsplash.com/photo-1556761175-b413da4baf72?w=600&h=400&fit=crop" 
-                alt="OLatus Brand" 
+              <img
+                src="https://images.unsplash.com/photo-1556761175-b413da4baf72?w=600&h=400&fit=crop"
+                alt="OLatus Brand"
                 className="w-full rounded-xl shadow-2xl border border-cyan-500/20"
               />
             </div>
-            
+
             <div>
               <h2 className="text-4xl font-bold text-white mb-6">
                 Own Your <span className="bg-gradient-to-r from-cyan-400 to-purple-600 text-transparent bg-clip-text">Brand</span>
@@ -361,10 +454,10 @@ const ProductDevelopment = () => {
               Our Working Process or Flowchart
             </span>
           </h2>
-          
+
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mt-12">
             {workflowSteps.map((step, index) => (
-              <div 
+              <div
                 key={index}
                 className="relative bg-[#002E3C]/50 backdrop-blur-sm rounded-xl p-6 border border-cyan-500/20 hover:border-cyan-500/50 transition-all duration-300 hover:transform hover:scale-105"
               >
@@ -373,7 +466,7 @@ const ProductDevelopment = () => {
                 </div>
                 <h3 className="text-xl font-bold text-white mb-3">{step.title}</h3>
                 <p className="text-gray-300 text-sm leading-relaxed">{step.description}</p>
-                
+
                 {index < workflowSteps.length - 1 && (
                   <div className="hidden lg:block absolute top-1/2 -right-4 transform -translate-y-1/2">
                     <ChevronRight className="text-cyan-400" size={32} />
@@ -396,95 +489,144 @@ const ProductDevelopment = () => {
           </div>
 
           <div className="bg-[#002E3C]/50 backdrop-blur-sm rounded-xl p-8 border border-cyan-500/20">
-            <form className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {submitStatus.message && (
+                <div className={`p-4 rounded-lg ${submitStatus.type === 'success' ? 'bg-green-500/20 text-green-400 border border-green-500/30' : 'bg-red-500/20 text-red-400 border border-red-500/30'}`}>
+                  {submitStatus.message}
+                </div>
+              )}
+
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-gray-300 mb-2">First Name*</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
+                    name="firstName"
+                    value={formData.firstName}
+                    onChange={handleInputChange}
                     className="w-full px-4 py-3 bg-[#001a24] border border-cyan-500/30 rounded-lg focus:outline-none focus:border-cyan-400 text-white"
                     required
                   />
                 </div>
                 <div>
                   <label className="block text-gray-300 mb-2">Last Name*</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
+                    name="lastName"
+                    value={formData.lastName}
+                    onChange={handleInputChange}
                     className="w-full px-4 py-3 bg-[#001a24] border border-cyan-500/30 rounded-lg focus:outline-none focus:border-cyan-400 text-white"
                     required
                   />
                 </div>
               </div>
 
-              <div>
-                <label className="block text-gray-300 mb-2">Email address*</label>
-                <input 
-                  type="email" 
-                  className="w-full px-4 py-3 bg-[#001a24] border border-cyan-500/30 rounded-lg focus:outline-none focus:border-cyan-400 text-white"
-                  required
-                />
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-gray-300 mb-2">Email address*</label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 bg-[#001a24] border border-cyan-500/30 rounded-lg focus:outline-none focus:border-cyan-400 text-white"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-300 mb-2">Phone No*</label>
+                  <input
+                    type="tel"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 bg-[#001a24] border border-cyan-500/30 rounded-lg focus:outline-none focus:border-cyan-400 text-white"
+                    required
+                  />
+                </div>
               </div>
 
-              <div>
-                <label className="block text-gray-300 mb-2">Phone No*</label>
-                <input 
-                  type="tel" 
-                  className="w-full px-4 py-3 bg-[#001a24] border border-cyan-500/30 rounded-lg focus:outline-none focus:border-cyan-400 text-white"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-gray-300 mb-2">Company/Organization (if any)</label>
-                <input 
-                  type="text" 
-                  className="w-full px-4 py-3 bg-[#001a24] border border-cyan-500/30 rounded-lg focus:outline-none focus:border-cyan-400 text-white"
-                />
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-gray-300 mb-2">Company/Organization (if any)</label>
+                  <input
+                    type="text"
+                    name="company"
+                    value={formData.company}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 bg-[#001a24] border border-cyan-500/30 rounded-lg focus:outline-none focus:border-cyan-400 text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-300 mb-2">Project Type*</label>
+                  <select
+                    name="projectType"
+                    value={formData.projectType}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 bg-[#001a24] border border-cyan-500/30 rounded-lg focus:outline-none focus:border-cyan-400 text-white"
+                    required
+                  >
+                    <option value="Product Development">Full Product Development</option>
+                    <option value="Component Sourcing">Component Sourcing</option>
+                    <option value="Prototyping">Design & Prototyping</option>
+                    <option value="Manufacturing">Final Manufacturing</option>
+                    <option value="PCB Design">PCB Customization</option>
+                  </select>
+                </div>
               </div>
 
               <div>
                 <label className="block text-gray-300 mb-2">Describe Your Requirements*</label>
-                <textarea 
+                <textarea
+                  name="description"
+                  value={formData.description}
+                  onChange={handleInputChange}
                   rows={6}
                   className="w-full px-4 py-3 bg-[#001a24] border border-cyan-500/30 rounded-lg focus:outline-none focus:border-cyan-400 text-white resize-none"
-                  placeholder="Please describe your product idea, requirements, and specifications in detail..."
+                  placeholder="Please describe your product idea, requirements, specifications, and volume in detail..."
                   required
                 ></textarea>
               </div>
 
               <div>
-                <label className="block text-gray-300 mb-2">Upload Documents (If any)</label>
+                <label className="block text-gray-300 mb-2">Upload Request Document (Max 10MB)</label>
                 <div className="relative">
-                  <input 
-                    type="file" 
+                  <input
+                    type="file"
                     multiple
-                    className="w-full px-4 py-3 bg-[#001a24] border border-cyan-500/30 rounded-lg focus:outline-none focus:border-cyan-400 text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-cyan-500/20 file:text-cyan-400 hover:file:bg-cyan-500/30"
+                    onChange={handleFileChange}
+                    className="w-full px-4 py-3 bg-[#001a24] border border-cyan-500/30 rounded-lg focus:outline-none focus:border-cyan-400 text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-cyan-500/20 file:text-cyan-400 hover:file:bg-cyan-500/30 cursor-pointer"
                   />
+                  {/* File List Display */}
+                  {formData.files && formData.files.length > 0 && (
+                    <div className="mt-2 space-y-1">
+                      {Array.from(formData.files).map((file, index) => (
+                        <div key={index} className="text-sm text-gray-400 flex items-center">
+                          <CheckCircle size={14} className="text-green-400 mr-2" />
+                          {file.name}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
 
-              <div>
-                <label className="block text-gray-300 mb-2">Please type the characters*</label>
-                <div className="flex items-center gap-4">
-                  <div className="bg-gray-200 px-4 py-3 rounded-lg font-mono text-lg tracking-wider text-gray-800 select-none">
-                    XYZ789
-                  </div>
-                  <input 
-                    type="text" 
-                    className="flex-1 px-4 py-3 bg-[#001a24] border border-cyan-500/30 rounded-lg focus:outline-none focus:border-cyan-400 text-white"
-                    placeholder="Enter characters"
-                    required
-                  />
-                </div>
-                <p className="text-sm text-gray-400 mt-2">This helps us prevent spam, thank you.</p>
+              <div className="pt-4">
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full md:w-auto px-8 py-4 bg-gradient-to-r from-orange-500 to-pink-600 text-white font-semibold rounded-lg hover:shadow-lg hover:shadow-orange-500/50 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      Sending...
+                    </>
+                  ) : (
+                    'Submit Request'
+                  )}
+                </button>
               </div>
-
-              <button 
-                type="submit"
-                className="px-8 py-4 bg-gradient-to-r from-orange-500 to-pink-600 text-white font-semibold rounded-lg hover:shadow-lg hover:shadow-orange-500/50 transition-all duration-300 transform hover:scale-105"
-              >
-                Send
-              </button>
             </form>
           </div>
         </div>
@@ -501,16 +643,16 @@ const ProductDevelopment = () => {
           <p className="text-center text-gray-300 mb-12">
             Check out some of our latest customized product portfolio for our clients. The portfolio contains products customized for various different sectors as per our expertise.
           </p>
-          
+
           <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
             {portfolio.map((item, index) => (
-              <div 
+              <div
                 key={index}
                 className="group relative bg-[#002E3C]/50 backdrop-blur-sm rounded-xl overflow-hidden border border-cyan-500/20 hover:border-cyan-500/50 transition-all duration-300 hover:transform hover:scale-105"
               >
                 <div className="relative aspect-video overflow-hidden">
-                  <img 
-                    src={item.image} 
+                  <img
+                    src={item.image}
                     alt={item.title}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                   />

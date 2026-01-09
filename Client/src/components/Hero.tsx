@@ -346,7 +346,7 @@ const Hero = () => {
   };
 
   return (
-    <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden pb-0 pt-10 sm:pt-0">
+    <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden pb-20 pt-10 sm:pt-0 sm:pb-0">
       {/* Background handled by site-wide ScrollArt only */}
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-20">
@@ -357,7 +357,7 @@ const Hero = () => {
               <span className="text-cyan-400 text-sm font-medium">Core Electronics & Tech Innovation</span>
             </div>
 
-            <h1 className="text-5xl md:text-7xl font-bold leading-tight animate-fade-up" style={{ animationDelay: '250ms' }}>
+            <h1 className="text-4xl md:text-7xl font-bold leading-tight animate-fade-up" style={{ animationDelay: '250ms' }}>
               <span className="text-white">Empowering the</span>
               <br />
               <span className="bg-gradient-to-r from-cyan-400 via-purple-500 to-pink-500 text-transparent bg-clip-text animate-pulse">
@@ -375,7 +375,7 @@ const Hero = () => {
             <div className="flex flex-col sm:flex-row gap-4 animate-fade-up" style={{ animationDelay: '550ms' }}>
               <button
                 onClick={openContactModal}
-                className="group px-8 py-4 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold rounded-lg hover:shadow-lg hover:shadow-cyan-500/50 transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-2 animate-glow"
+                className="w-full sm:w-auto group px-8 py-4 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold rounded-lg hover:shadow-lg hover:shadow-cyan-500/50 transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-2 animate-glow"
               >
                 Get Free Consultation
                 <ArrowRight className="group-hover:translate-x-1 transition-transform" size={20} />
@@ -387,24 +387,24 @@ const Hero = () => {
                     servicesSection.scrollIntoView({ behavior: 'smooth' });
                   }
                 }}
-                className="px-8 py-4 bg-transparent border-2 border-purple-500 text-purple-400 font-semibold rounded-lg hover:bg-purple-500/10 hover:shadow-lg hover:shadow-purple-500/50 transition-all duration-300"
+                className="w-full sm:w-auto px-8 py-4 bg-transparent border-2 border-purple-500 text-purple-400 font-semibold rounded-lg hover:bg-purple-500/10 hover:shadow-lg hover:shadow-purple-500/50 transition-all duration-300"
               >
                 View Our Services
               </button>
             </div>
 
-            <div className="flex gap-8 pt-8">
+            <div className="grid grid-cols-3 gap-2 sm:gap-8 pt-8 border-t border-white/5 mt-8 sm:border-none sm:mt-0">
               <div className="text-center">
-                <div className="text-4xl font-bold bg-gradient-to-r from-cyan-400 to-purple-500 text-transparent bg-clip-text animate-pulse">7+</div>
-                <div className="text-gray-400 text-sm mt-1">Years Experience</div>
+                <div className="text-2xl sm:text-4xl font-bold bg-gradient-to-r from-cyan-400 to-purple-500 text-transparent bg-clip-text animate-pulse">7+</div>
+                <div className="text-gray-400 text-xs sm:text-sm mt-1">Years Experience</div>
               </div>
               <div className="text-center">
-                <div className="text-4xl font-bold bg-gradient-to-r from-cyan-400 to-purple-500 text-transparent bg-clip-text animate-pulse">500+</div>
-                <div className="text-gray-400 text-sm mt-1">Projects Completed</div>
+                <div className="text-2xl sm:text-4xl font-bold bg-gradient-to-r from-cyan-400 to-purple-500 text-transparent bg-clip-text animate-pulse">500+</div>
+                <div className="text-gray-400 text-xs sm:text-sm mt-1">Projects Completed</div>
               </div>
               <div className="text-center">
-                <div className="text-4xl font-bold bg-gradient-to-r from-cyan-400 to-purple-500 text-transparent bg-clip-text animate-pulse">100+</div>
-                <div className="text-gray-400 text-sm mt-1">Happy Clients</div>
+                <div className="text-2xl sm:text-4xl font-bold bg-gradient-to-r from-cyan-400 to-purple-500 text-transparent bg-clip-text animate-pulse">100+</div>
+                <div className="text-gray-400 text-xs sm:text-sm mt-1">Happy Clients</div>
               </div>
             </div>
 
@@ -418,7 +418,7 @@ const Hero = () => {
         </div>
       </div>
 
-      <div className="absolute bottom-12 left-1/2 transform -translate-x-1/2 animate-bounce">
+      <div className="absolute bottom-4 sm:bottom-12 left-1/2 transform -translate-x-1/2 animate-bounce">
         <div className="w-6 h-10 border-2 border-cyan-400 rounded-full flex items-start justify-center p-2">
           <div className="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-pulse"></div>
         </div>

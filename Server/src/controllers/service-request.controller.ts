@@ -19,6 +19,7 @@ export const createServiceRequest = async (req: Request, res: Response) => {
     // Get uploaded files
     const files = req.files as Express.Multer.File[];
     const filePaths = files ? files.map(file => ({
+      fileName: file.originalname,
       fileUrl: `/uploads/${file.filename}`,
       uploadedAt: new Date()
     })) : [];
@@ -35,9 +36,9 @@ export const createServiceRequest = async (req: Request, res: Response) => {
 
     const serviceRequest = new ServiceRequest(serviceRequestData);
     await serviceRequest.save();
-    
+
     logger.info(`New service request created: ${serviceRequest._id} - ${serviceRequest.serviceType}`);
-    
+
     res.status(201).json({
       success: true,
       message: 'Service request submitted successfully',
@@ -56,26 +57,26 @@ export const createServiceRequest = async (req: Request, res: Response) => {
 // Get all service requests (Admin)
 export const getAllServiceRequests = async (req: Request, res: Response) => {
   try {
-    const { 
-      serviceType, 
-      status, 
-      paymentStatus, 
+    const {
+      serviceType,
+      status,
+      paymentStatus,
       priority,
-      page = 1, 
+      page = 1,
       limit = 20,
       sortBy = 'createdAt',
       sortOrder = 'desc'
     } = req.query;
-    
+
     const filter: any = {};
     if (serviceType) filter.serviceType = serviceType;
     if (status) filter.status = status;
     if (paymentStatus) filter.paymentStatus = paymentStatus;
     if (priority) filter.priority = priority;
-    
+
     const skip = (Number(page) - 1) * Number(limit);
     const sort: any = { [sortBy as string]: sortOrder === 'asc' ? 1 : -1 };
-    
+
     const [requests, total] = await Promise.all([
       ServiceRequest.find(filter)
         .sort(sort)
@@ -84,7 +85,7 @@ export const getAllServiceRequests = async (req: Request, res: Response) => {
         .populate('userId', 'name email'),
       ServiceRequest.countDocuments(filter),
     ]);
-    
+
     res.json({
       success: true,
       data: requests,
@@ -110,14 +111,14 @@ export const getServiceRequestById = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const request = await ServiceRequest.findById(id).populate('userId', 'name email');
-    
+
     if (!request) {
       return res.status(404).json({
         success: false,
         message: 'Service request not found',
       });
     }
-    
+
     res.json({
       success: true,
       data: request,
@@ -139,7 +140,7 @@ export const getServiceRequestsByEmail = async (req: Request, res: Response) => 
     const requests = await ServiceRequest.find({ email })
       .sort({ createdAt: -1 })
       .select('-orderNotes');
-    
+
     res.json({
       success: true,
       data: requests,
@@ -160,7 +161,7 @@ export const updateServiceRequestStatus = async (req: Request, res: Response) =>
   try {
     const { id } = req.params;
     const { status, note, addedBy } = req.body;
-    
+
     const request = await ServiceRequest.findById(id);
     if (!request) {
       return res.status(404).json({
@@ -168,9 +169,9 @@ export const updateServiceRequestStatus = async (req: Request, res: Response) =>
         message: 'Service request not found',
       });
     }
-    
+
     request.status = status;
-    
+
     if (note) {
       request.orderNotes.push({
         note,
@@ -178,11 +179,11 @@ export const updateServiceRequestStatus = async (req: Request, res: Response) =>
         addedAt: new Date(),
       });
     }
-    
+
     await request.save();
-    
+
     logger.info(`Service request ${id} status updated to ${status}`);
-    
+
     res.json({
       success: true,
       message: 'Status updated successfully',
@@ -203,7 +204,7 @@ export const updateServiceRequestPricing = async (req: Request, res: Response) =
   try {
     const { id } = req.params;
     const { estimatedCost, quotedPrice, finalPrice } = req.body;
-    
+
     const request = await ServiceRequest.findById(id);
     if (!request) {
       return res.status(404).json({
@@ -211,13 +212,13 @@ export const updateServiceRequestPricing = async (req: Request, res: Response) =
         message: 'Service request not found',
       });
     }
-    
+
     if (estimatedCost !== undefined) request.estimatedCost = estimatedCost;
     if (quotedPrice !== undefined) request.quotedPrice = quotedPrice;
     if (finalPrice !== undefined) request.finalPrice = finalPrice;
-    
+
     await request.save();
-    
+
     res.json({
       success: true,
       message: 'Pricing updated successfully',
@@ -238,7 +239,7 @@ export const addServiceRequestNote = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const { note, addedBy } = req.body;
-    
+
     const request = await ServiceRequest.findById(id);
     if (!request) {
       return res.status(404).json({
@@ -246,15 +247,15 @@ export const addServiceRequestNote = async (req: Request, res: Response) => {
         message: 'Service request not found',
       });
     }
-    
+
     request.orderNotes.push({
       note,
       addedBy: addedBy || 'admin',
       addedAt: new Date(),
     });
-    
+
     await request.save();
-    
+
     res.json({
       success: true,
       message: 'Note added successfully',
@@ -275,16 +276,16 @@ export const deleteServiceRequest = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const request = await ServiceRequest.findByIdAndDelete(id);
-    
+
     if (!request) {
       return res.status(404).json({
         success: false,
         message: 'Service request not found',
       });
     }
-    
+
     logger.info(`Service request deleted: ${id}`);
-    
+
     res.json({
       success: true,
       message: 'Service request deleted successfully',
@@ -331,7 +332,7 @@ export const createInternshipApplication = async (req: Request, res: Response) =
     const parseArray = (v: any): string[] => {
       if (!v) return [];
       if (Array.isArray(v)) return v;
-      try { const arr = JSON.parse(v); return Array.isArray(arr) ? arr : []; } catch { return String(v).split(',').map(s=>s.trim()).filter(Boolean); }
+      try { const arr = JSON.parse(v); return Array.isArray(arr) ? arr : []; } catch { return String(v).split(',').map(s => s.trim()).filter(Boolean); }
     };
     const skills = parseArray(body.skills);
     const programmingLanguages = parseArray(body.programmingLanguages);
@@ -389,9 +390,9 @@ export const createInternshipApplication = async (req: Request, res: Response) =
 
     const application = new InternshipApplication(payload);
     await application.save();
-    
+
     logger.info(`New internship application: ${application._id} - ${application.position}`);
-    
+
     res.status(201).json({
       success: true,
       message: 'Application submitted successfully',
@@ -410,24 +411,24 @@ export const createInternshipApplication = async (req: Request, res: Response) =
 // Get all internship applications (Admin)
 export const getAllInternshipApplications = async (req: Request, res: Response) => {
   try {
-    const { 
-      position, 
-      status, 
+    const {
+      position,
+      status,
       graduationYear,
-      page = 1, 
+      page = 1,
       limit = 20,
       sortBy = 'appliedAt',
       sortOrder = 'desc'
     } = req.query;
-    
+
     const filter: any = {};
     if (position) filter.position = position;
     if (status) filter.status = status;
     if (graduationYear) filter.graduationYear = Number(graduationYear);
-    
+
     const skip = (Number(page) - 1) * Number(limit);
     const sort: any = { [sortBy as string]: sortOrder === 'asc' ? 1 : -1 };
-    
+
     const [applications, total] = await Promise.all([
       InternshipApplication.find(filter)
         .sort(sort)
@@ -435,7 +436,7 @@ export const getAllInternshipApplications = async (req: Request, res: Response) 
         .limit(Number(limit)),
       InternshipApplication.countDocuments(filter),
     ]);
-    
+
     res.json({
       success: true,
       data: applications,
@@ -461,14 +462,14 @@ export const getInternshipApplicationById = async (req: Request, res: Response) 
   try {
     const { id } = req.params;
     const application = await InternshipApplication.findById(id);
-    
+
     if (!application) {
       return res.status(404).json({
         success: false,
         message: 'Application not found',
       });
     }
-    
+
     res.json({
       success: true,
       data: application,
@@ -488,7 +489,7 @@ export const updateInternshipApplicationStatus = async (req: Request, res: Respo
   try {
     const { id } = req.params;
     const { status, note, addedBy } = req.body;
-    
+
     const application = await InternshipApplication.findById(id);
     if (!application) {
       return res.status(404).json({
@@ -496,9 +497,9 @@ export const updateInternshipApplicationStatus = async (req: Request, res: Respo
         message: 'Application not found',
       });
     }
-    
+
     application.status = status;
-    
+
     if (note) {
       application.notes.push({
         note,
@@ -506,11 +507,11 @@ export const updateInternshipApplicationStatus = async (req: Request, res: Respo
         addedAt: new Date(),
       });
     }
-    
+
     await application.save();
-    
+
     logger.info(`Internship application ${id} status updated to ${status}`);
-    
+
     res.json({
       success: true,
       message: 'Status updated successfully',
@@ -547,7 +548,7 @@ export const getInternshipStatistics = async (req: Request, res: Response) => {
         .limit(10)
         .select('firstName lastName email position status appliedAt'),
     ]);
-    
+
     res.json({
       success: true,
       data: {

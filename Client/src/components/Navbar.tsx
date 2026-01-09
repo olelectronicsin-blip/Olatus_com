@@ -78,9 +78,11 @@ const Navbar = () => {
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled
-          ? 'bg-[#002E3C]/95 backdrop-blur-md shadow-lg shadow-cyan-500/10'
-          : 'bg-transparent'
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isMobileMenuOpen
+          ? 'bg-[#001a24] shadow-none'
+          : isScrolled
+            ? 'bg-[#002E3C]/50 backdrop-blur-md shadow-lg shadow-cyan-500/10'
+            : 'bg-transparent'
         }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -153,20 +155,20 @@ const Navbar = () => {
       </div>
 
       {isMobileMenuOpen && (
-        <div className="md:hidden bg-[#002E3C]/98 backdrop-blur-md border-t border-cyan-500/20">
-          <div className="px-4 py-6 space-y-4">
+        <div className="md:hidden fixed inset-x-0 top-20 bottom-0 bg-[#001a24] z-40 overflow-y-auto border-t border-cyan-500/20">
+          <div className="px-6 py-8 space-y-6">
             {navItems.map((item) => (
               item.hasDropdown ? (
-                <div key={item.label}>
+                <div key={item.label} className="border-b border-white/5 pb-4 last:border-0 last:pb-0">
                   <button
                     onClick={() => setIsServicesOpen(!isServicesOpen)}
-                    className="w-full flex items-center justify-between text-gray-300 hover:text-cyan-400 transition-colors duration-300 py-2"
+                    className="w-full flex items-center justify-between text-cyan-400 font-medium text-lg py-2"
                   >
                     <span>{item.label}</span>
-                    <ChevronDown size={16} className={`transition-transform duration-300 ${isServicesOpen ? 'rotate-180' : ''}`} />
+                    <ChevronDown size={20} className={`transition-transform duration-300 ${isServicesOpen ? 'rotate-180' : ''}`} />
                   </button>
                   {isServicesOpen && (
-                    <div className="pl-4 space-y-2 mt-2">
+                    <div className="pl-0 mt-4 space-y-4">
                       {serviceSubItems.map((subItem) => (
                         <button
                           key={subItem.name}
@@ -174,7 +176,7 @@ const Navbar = () => {
                             handleNavClick(subItem.href);
                             setIsMobileMenuOpen(false);
                           }}
-                          className="block w-full text-left text-gray-400 hover:text-cyan-400 transition-colors duration-300 py-2 text-sm"
+                          className="block w-full text-left text-gray-400 hover:text-white transition-colors duration-300 text-base"
                         >
                           {subItem.name}
                         </button>
@@ -189,21 +191,23 @@ const Navbar = () => {
                     handleNavClick(item.href);
                     setIsMobileMenuOpen(false);
                   }}
-                  className="block w-full text-left text-gray-300 hover:text-cyan-400 transition-colors duration-300 py-2"
+                  className="block w-full text-left text-gray-300 hover:text-white transition-colors duration-300 py-3 text-lg font-medium border-b border-white/5 last:border-0"
                 >
                   {item.label}
                 </button>
               )
             ))}
-            <button
-              onClick={() => {
-                openContactModal();
-                setIsMobileMenuOpen(false);
-              }}
-              className="w-full px-6 py-3 bg-gradient-to-r from-orange-500 to-pink-600 text-white font-semibold rounded-lg"
-            >
-              Get In Touch
-            </button>
+            <div className="pt-8">
+              <button
+                onClick={() => {
+                  openContactModal();
+                  setIsMobileMenuOpen(false);
+                }}
+                className="w-full px-6 py-4 bg-gradient-to-r from-orange-500 to-pink-600 text-white font-bold text-lg rounded-xl shadow-lg shadow-orange-500/20"
+              >
+                Get In Touch
+              </button>
+            </div>
           </div>
         </div>
       )}
