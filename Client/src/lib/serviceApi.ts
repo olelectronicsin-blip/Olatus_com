@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 // Create axios instance with default config
 const apiClient = axios.create({
@@ -69,7 +69,7 @@ export const submitContactForm = async (data: ContactData) => {
       subject: data.service || data.subject || 'General Inquiry',
       message: data.message
     };
-    
+
     const response = await apiClient.post('/contact', transformedData);
     return response.data;
   } catch (error) {
@@ -91,15 +91,15 @@ export const submitServiceRequest = async (data: ServiceRequestData) => {
       formData.append('email', data.email);
       formData.append('phone', data.phone);
       formData.append('serviceType', data.serviceType);
-      
+
       if (data.description) {
         formData.append('description', data.description);
       }
-      
+
       if (data.specifications) {
         formData.append('specifications', JSON.stringify(data.specifications));
       }
-      
+
       // Append all files
       data.files.forEach((file) => {
         formData.append('files', file);
@@ -141,31 +141,31 @@ export const submitInternshipApplication = async (data: InternshipApplicationDat
     formData.append('position', data.position);
     formData.append('education', data.education);
     formData.append('skills', JSON.stringify(data.skills));
-    
+
     if (data.experience) {
       formData.append('experience', data.experience);
     }
-    
+
     if (data.resume) {
       formData.append('resume', data.resume);
     }
-    
+
     if (data.coverLetter) {
       formData.append('coverLetter', data.coverLetter);
     }
-    
+
     if (data.portfolio) {
       formData.append('portfolio', data.portfolio);
     }
-    
+
     if (data.linkedIn) {
       formData.append('linkedIn', data.linkedIn);
     }
-    
+
     if (data.github) {
       formData.append('github', data.github);
     }
-    
+
     if (data.availableFrom) {
       formData.append('availableFrom', data.availableFrom.toISOString());
     }
