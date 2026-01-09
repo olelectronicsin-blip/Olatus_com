@@ -22,9 +22,9 @@ export default function Dashboard() {
 
   const fetchDashboardStats = async () => {
     try {
-      const { data} = await api.get('/admin/dashboard');
+      const { data } = await api.get('/admin/dashboard');
       setStats(data.data);
-    } catch (error: any) {
+    } catch {
       toast.error('Failed to load dashboard stats');
     } finally {
       setLoading(false);
@@ -118,7 +118,7 @@ export default function Dashboard() {
           </div>
           <h2 className="text-xl font-bold text-white">Recent Contacts</h2>
         </div>
-        
+
         <div className="space-y-3">
           {stats?.recentContacts && stats.recentContacts.length > 0 ? (
             stats.recentContacts.map((contact: any) => (
@@ -127,11 +127,10 @@ export default function Dashboard() {
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
                       <p className="font-semibold text-white">{contact.name}</p>
-                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                        contact.status === 'new' ? 'bg-green-500/20 text-green-400 border border-green-500/30' :
-                        contact.status === 'in-progress' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' :
-                        'bg-gray-500/20 text-gray-400 border border-gray-500/30'
-                      }`}>
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${contact.status === 'new' ? 'bg-green-500/20 text-green-400 border border-green-500/30' :
+                          contact.status === 'in-progress' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' :
+                            'bg-gray-500/20 text-gray-400 border border-gray-500/30'
+                        }`}>
                         {contact.status}
                       </span>
                     </div>

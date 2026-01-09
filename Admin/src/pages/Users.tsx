@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Users as UsersIcon, Shield, Trash2 } from 'lucide-react';
+import { Users as UsersIcon, Trash2 } from 'lucide-react';
 import api from '../lib/api';
 import toast from 'react-hot-toast';
 import { format } from 'date-fns';
@@ -16,7 +16,7 @@ export default function Users() {
     try {
       const { data } = await api.get('/admin/users');
       setUsers(data.data);
-    } catch (error) {
+    } catch {
       toast.error('Failed to load users');
     } finally {
       setLoading(false);
@@ -28,7 +28,7 @@ export default function Users() {
       await api.patch(`/admin/users/${id}/role`, { role });
       toast.success('User role updated successfully');
       fetchUsers();
-    } catch (error) {
+    } catch {
       toast.error('Failed to update user role');
     }
   };
@@ -40,7 +40,7 @@ export default function Users() {
       await api.delete(`/admin/users/${id}`);
       toast.success('User deleted successfully');
       fetchUsers();
-    } catch (error) {
+    } catch {
       toast.error('Failed to delete user');
     }
   };

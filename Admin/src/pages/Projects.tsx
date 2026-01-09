@@ -15,7 +15,7 @@ export default function Projects() {
     try {
       const { data } = await api.get('/projects');
       setProjects(data.data);
-    } catch (error) {
+    } catch {
       toast.error('Failed to load projects');
     } finally {
       setLoading(false);
@@ -29,7 +29,7 @@ export default function Projects() {
       await api.delete(`/projects/${id}`);
       toast.success('Project deleted successfully');
       fetchProjects();
-    } catch (error) {
+    } catch {
       toast.error('Failed to delete project');
     }
   };
@@ -72,11 +72,10 @@ export default function Projects() {
                 <span className="px-3 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
                   {project.category}
                 </span>
-                <span className={`px-3 py-1 text-xs rounded-full ${
-                  project.status === 'completed' ? 'bg-green-100 text-green-800' :
-                  project.status === 'in-progress' ? 'bg-yellow-100 text-yellow-800' :
-                  'bg-gray-100 text-gray-800'
-                }`}>
+                <span className={`px-3 py-1 text-xs rounded-full ${project.status === 'completed' ? 'bg-green-100 text-green-800' :
+                    project.status === 'in-progress' ? 'bg-yellow-100 text-yellow-800' :
+                      'bg-gray-100 text-gray-800'
+                  }`}>
                   {project.status}
                 </span>
               </div>

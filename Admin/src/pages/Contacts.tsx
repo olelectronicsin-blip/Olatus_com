@@ -19,7 +19,7 @@ export default function Contacts() {
     try {
       const { data } = await api.get('/contact');
       setContacts(data.data);
-    } catch (error) {
+    } catch {
       toast.error('Failed to load contacts');
     } finally {
       setLoading(false);
@@ -31,27 +31,27 @@ export default function Contacts() {
       await api.patch(`/contact/${id}`, { status });
       toast.success('Status updated successfully');
       fetchContacts();
-    } catch (error) {
+    } catch {
       toast.error('Failed to update status');
     }
   };
 
   const deleteContact = async (id: string) => {
     if (!confirm('Are you sure you want to delete this contact?')) return;
-    
+
     try {
       await api.delete(`/contact/${id}`);
       toast.success('Contact deleted successfully');
       fetchContacts();
       setSelectedContact(null);
-    } catch (error) {
+    } catch {
       toast.error('Failed to delete contact');
     }
   };
 
   const filteredContacts = contacts
     .filter(c => filter === 'all' || c.status === filter)
-    .filter(c => 
+    .filter(c =>
       searchQuery === '' ||
       c.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       c.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -140,11 +140,10 @@ export default function Contacts() {
               <button
                 key={status.value}
                 onClick={() => setFilter(status.value)}
-                className={`px-4 py-2 rounded-lg capitalize transition-all duration-200 font-medium ${
-                  filter === status.value
+                className={`px-4 py-2 rounded-lg capitalize transition-all duration-200 font-medium ${filter === status.value
                     ? 'bg-gradient-to-r from-cyan-500 to-purple-500 text-white shadow-lg shadow-cyan-500/50'
                     : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white border border-white/10'
-                }`}
+                  }`}
               >
                 {status.label}
                 <span className="ml-2 text-xs opacity-75">({status.count})</span>
@@ -157,8 +156,8 @@ export default function Contacts() {
       {/* Contacts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {filteredContacts.map((contact) => (
-          <div 
-            key={contact._id} 
+          <div
+            key={contact._id}
             className="glass-card border-white/10 hover:border-cyan-500/30 transition-all duration-300 group cursor-pointer"
             onClick={() => setSelectedContact(contact)}
           >

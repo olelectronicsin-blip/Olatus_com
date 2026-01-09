@@ -15,7 +15,7 @@ export default function Analytics() {
     try {
       const { data } = await api.get('/analytics');
       setAnalytics(data.data);
-    } catch (error) {
+    } catch {
       toast.error('Failed to load analytics');
     } finally {
       setLoading(false);
@@ -71,7 +71,7 @@ export default function Analytics() {
             <div>
               <p className="text-sm font-medium text-gray-600">Engagement Rate</p>
               <p className="text-3xl font-bold text-gray-900 mt-2">
-                {analytics?.uniqueVisitors > 0 
+                {analytics?.uniqueVisitors > 0
                   ? ((analytics.pageViews / analytics.uniqueVisitors).toFixed(1))
                   : 0}
               </p>
